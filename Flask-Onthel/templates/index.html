@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/output.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="static/img/LogoWhite.svg" />
+    <title>Document</title>
+</head>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;700&display=swap');
+
+    :root {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            Ubuntu, "Helvetica Neue", Helvetica, Arial, "PingFang SC",
+            "Hiragino Sans GB", "Microsoft Yahei UI", "Microsoft Yahei",
+            "Source Han Sans CN", sans-serif;
+    }
+</style>
+
+<body class="h-auto w-screen bg-white">
+    <!-- Flowbite CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+
+    <nav class="fixed w-full border-dark bg-white px-12 py-5 shadow-md">
+        <div class="flex items-center justify-between">
+            <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
+                <img src="static/img/LogoWhite.svg" class="h-[5vh] w-auto" alt="Group Logo" />
+            </a>
+            <button data-collapse-toggle="navbar-default" type="button"
+                class="hover:bg-primay inline-flex h-10 w-10 items-center justify-center rounded-lg p-2 text-sm text-dark focus:outline-none md:hidden"
+                aria-controls="navbar-default" aria-expanded="false">
+                <span class="sr-only">Open main menu</span>
+                <svg class="h-5 w-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                    viewBox="0 0 17 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M1 1h15M1 7h15M1 13h15" />
+                </svg>
+            </button>
+            <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+                    <ul
+                        class="md border-primay mt-4 flex flex-col rounded-lg border bg-gray-50 p-4 font-medium rtl:space-x-reverse md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:p-0">
+                        <li class="flex items-center">
+                            <a href="/login" class="mr-3 block rounded text-base text-dark md:p-0" aria-current="page">
+                                Login</a>
+                            <!-- <button id="dropdownUserAvatarButton" data-dropdown-toggle="dropdownAvatar" -->
+                                <!-- class="rounded-full bg-gradient-to-tl from-secondary to-primary p-[0.15rem]" type="button"> -->
+                                <!-- <img class="h-[5vh] w-auto" src="static/img/logo.png" alt="Profile Profile"> -->
+                            <!-- </button> -->
+                        </li>
+                    </ul>
+            </div>
+        </div>
+        </div>
+    </nav>    
+
+    <section class="pt-22 flex h-full w-screen items-center justify-center px-5" id="Kelompok">
+        <div class="mt-24 flex h-full w-full flex-col items-center justify-between rounded-md">
+            <div class="mt-5 flex h-auto w-full flex-col items-center justify-center">
+                <h1
+                    class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-center text-[4.1vw] font-extrabold text-transparent">
+                    Welcome in SOS</h1>
+                <p class="mt-2 w-[45vw] text-center text-xs text-dark sm:text-sm md:text-base lg:text-xl">
+                    Ingat layani pelanggan dengan senyum, SOS (Sepeda Onthel Skena)
+                </p>
+            </div>
+
+            <div class="flex h-full w-full items-center justify-between pt-10">
+                <!-- Card 1 -->
+                <div class="flex h-full w-full items-center justify-between pt-10">
+                    <style>
+                        .group:hover~.card-3 .img {
+                            filter: grayscale(100%);
+                        }
+
+                        .group2:hover~.card-3 .img {
+                            filter: grayscale(100%) !important;
+                        }
+                    </style>
+                    <!-- Card 1 -->
+                    <div class="group flex h-[40vh] w-[17.8vw] items-end rounded-md bg-gray-100 shadow-lg hover:z-10">
+                        <img class="img h-full w-full rounded-md grayscale transition duration-300 group-hover:grayscale-0"
+                            src="static/img/sepedamerah.png" alt="DIAZ ARVINDA ARDIAN">
+                        <!-- <div -->
+                            <!-- class="absolute z-[1] mb-4 ml-4 h-auto w-[14.5vw] rounded bg-white px-3 py-2 text-justify text-dark shadow"> -->
+                            <!-- <h3 class="text-sm font-bold md:text-base lg:text-lg">Diaz Arvinda Ardian</h3> -->
+                        <!-- </div> -->
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="group flex h-[40vh] w-[17.5vw] items-end rounded-md bg-gray-100 shadow-lg hover:z-10">
+                        <img class="img h-full w-full rounded-md grayscale transition duration-300 group-hover:grayscale-0"
+                            src="static/img/sepedalipat.png" alt="RICHARD HASANNAIN MONGIDE">
+                        <!-- <div -->
+                            <!-- class="absolute z-[1] mb-4 ml-4 h-auto w-[14.5vw] rounded bg-white px-3 py-2 text-justify text-dark shadow"> -->
+                            <!-- <h3 class="text-sm font-bold md:text-base lg:text-lg">Richard Hasannain Mongide</h3> -->
+                            <!-- <p class="text-dark">162112133056</p> -->
+                        <!-- </div> -->
+                    </div>
+
+                    <!-- Card 3 (Default without grayscale) -->
+                    <div id="card-3"
+                        class="card-3 flex h-[40vh] w-[17vw] items-end rounded-md bg-gray-100 shadow-lg hover:z-10">
+                        <img id="img-3" class="img h-full w-full rounded-md grayscale-0 transition duration-300"
+                            src="static/img/sepedakecil.png" alt="Nayaka Baswara">
+                        <!-- <div -->
+                            <!-- class="absolute z-[1] mb-4 ml-4 h-auto w-[14.5vw] rounded bg-white px-3 py-2 text-justify text-dark shadow"> -->
+                            <!-- <h3 class="text-sm font-bold md:text-base lg:text-lg">Nayaka Baswara</h3> -->
+                            <!-- <p class="text-dark">162112133065</p> -->
+                        <!-- </div> -->
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div
+                        class="group2 group flex h-[40vh] w-[17.5vw] items-end rounded-md bg-gray-100 shadow-lg hover:z-10">
+                        <img class="img h-full w-full rounded-md grayscale transition duration-300 group-hover:grayscale-0"
+                            src="static/img/sepedapink.png" alt="Dara Devinta Faradhilla">
+                        <!-- <div -->
+                            <!-- class="absolute z-[1] mb-4 ml-4 h-auto w-[14.5vw] rounded bg-white px-3 py-2 text-justify text-dark shadow"> -->
+                            <!-- <h3 class="text-sm font-bold md:text-base lg:text-lg">Dara Devinta Faradhilla</h3> -->
+                            <!-- <p class="text-dark">164221002</p> -->
+                        <!-- </div> -->
+                    </div>
+
+                    <!-- Card 5 -->
+                    <div
+                        class="group2 group flex h-[40vh] w-[17.8vw] items-end rounded-md bg-gray-100 shadow-lg hover:z-10">
+                        <img class="img h-full w-full rounded-md grayscale transition duration-300 group-hover:grayscale-0"
+                            src="static/img/sepedabiru.png" alt="Zhiddan Aditya Mahardika">
+                        <!-- <div -->
+                            <!-- class="absolute z-[1] mb-4 ml-4 h-auto w-[14.5vw] rounded bg-white px-3 py-2 text-justify text-dark shadow"> -->
+                            <!-- <h3 class="text-sm font-bold md:text-base lg:text-lg">Zhiddan Aditya Mahardika</h3> -->
+                            <!-- <p class="text-dark">164221086</p> -->
+                        <!-- </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        const cards = document.querySelectorAll('.group');
+        const card3Image = document.getElementById('img-3');
+
+        // Saat card lain di-hover, terapkan grayscale ke Card 3
+        cards.forEach(card => {
+            card.addEventListener('mouseover', () => {
+                card3Image.classList.add('grayscale');
+            });
+
+            card.addEventListener('mouseout', () => {
+                card3Image.classList.remove('grayscale');
+            });
+        });
+    </script>
+
+
+    <!-- Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+</body>
+</html>
