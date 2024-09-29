@@ -1,8 +1,10 @@
 <nav class="fixed w-full border-dark bg-white px-12 py-5 shadow-md z-40">
     <div class="flex items-center justify-between">
-        <button id="sidebar-toggle" class="flex items-center space-x-3 rtl:space-x-reverse" type="button">
-            <img src="{{ url_for('static', filename='img/Button.svg') }}" class="h-5 w-auto" alt="Group Logo" />
+        {% if session['logged_in'] %}
+        <button id="sidebar-toggle" class="w-full flex items-center space-x-3 rtl:space-x-reverse" type="button">
+            <img src="{{ url_for('static', filename='img/Button.svg') }}" class="h-5 w-auto" alt="Button" />
         </button>
+        {% endif %}
         <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul
                 class="md border-primay mt-4 flex flex-col rounded-lg border bg-gray-50 p-4 font-medium rtl:space-x-reverse md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:p-0">

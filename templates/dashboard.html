@@ -62,13 +62,25 @@
                             <th>
                                 <h1
                                     class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
-                                    Time Stamp
+                                    Date
+                                </h1>
+                            </th>
+                            <th>
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                    Time
                                 </h1>
                             </th>
                             <th class="w-[3.5vw]">
                                 <h1
                                     class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-center ml-1 px-3 py-2">
                                     Edit
+                                </h1>
+                            </th>
+                            <th class="w-[3.5vw]">
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-center ml-1 px-3 py-2">
+                                    Delete
                                 </h1>
                             </th>
                         </tr>
@@ -174,7 +186,21 @@
                                         <div
                                             class="h-full flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-primary outline-0 md:text-sm lg:text-base">
                                             <h1 class="w-full h-full flex justify-start items-center">
-                                                {{ purchase['timestamp'].strftime('%Y-%m-%d %H:%M:%S') }}
+                                                {{ purchase['timestamp'].strftime('%Y-%m-%d') }}
+                                            </h1>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td rowspan="{{ product_count }}">
+                                <div
+                                    class="w-full h-full flex flex-col {% if product_count == 1 %} justify-center {% endif %}">
+                                    <div class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary
+                                    text-white text-lg font-semibold my-1 mx-1 p-[2px]">
+                                        <div
+                                            class="h-full flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-primary outline-0 md:text-sm lg:text-base">
+                                            <h1 class="w-full h-full flex justify-start items-center">
+                                                {{ purchase['timestamp'].strftime('%H:%M:%S') }}
                                             </h1>
                                         </div>
                                     </div>
@@ -199,6 +225,24 @@
                                         </button>
                                     </div>
                                 </div>
+                            </td>
+                            <td rowspan="{{ product_count }}">
+                                <form action="{{ url_for('delete_transaction', transaction_id=purchase['id']) }}"
+                                    method="POST"
+                                    class="w-full h-full flex flex-col {% if product_count == 1 %} justify-center {% endif %}">
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1 p-[2px]">
+                                        <button id="delete-transaction-{{ purchase['id'] }}"
+                                            class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1 py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white ">
+                                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                <path fill-rule="evenodd"
+                                                    d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
                             </td>
                             {% endif %}
                         </tr>

@@ -7,35 +7,41 @@ This website is designed to support the cashier operations for PT. Sepeda Onthel
 ## Features
 
 1. Data visualization on the dashboard using **ApexCharts**.
-
 2. Responsive design with **TailwindCSS** for a modern user interface.
-
 3. Data management integrated with **Firebase**.
 
 ### Key Features:
 
 1. **Checkout System:**
-   The cashier can process customer purchases quickly and easily. The checkout system supports various payment methods and records all sales transactions.
-2. **Product Management:**
+   The cashier can process customer purchases quickly and easily. The checkout system supports various payment methods and records all sales transactions. Here is the sequence:
+
+   1. **Select Product:**
+
+      Cashier can quickly and easily select the products they wish to purchase.
+   2. **Checkout Confirmation:**
+
+      The system confirms the selected products and payment details before finalizing the transaction.
+   3. **After Confrim:**
+
+      After confirmation, the checkout system processes the payment and the purchase history will be displayed on the dashboard page.
+2. **Dashboard:**
+   The website includes a dashboard where the cashier or manager can review transaction history and sales reports, including metrics on revenue, total sales, and stock levels. This helps in making informed business decisions. The cashier can view the complete history of all transactions. This feature is useful for keeping track of daily sales and verifying orders.
+3. **Product:**
+
    * **Add Products:** Staff can add new products with desired specifications, such as product name, price, stock quantity, and additional item details like wheel type and frame type.
    * **Edit Products:** Existing product information can be updated, including price, stock, and specifications.
    * **Delete Products:** Products that are no longer sold can be removed from the inventory.
    * **View Products:** All available products can be displayed on the product page, making it easy for staff to check inventory.
-3. **Order Products from Suppliers:**
+4. **Order Products from Suppliers:**
+   Image
+
    The cashier can place orders to suppliers for items that are low in stock. The supplier will ship the ordered items using a distributor service.
-4. **Transaction History:**
-   The cashier can view the complete history of all transactions. This feature is useful for keeping track of daily sales and verifying orders.
-5. **Sales Reports and Dashboard:**
-   The website includes a dashboard where the cashier or manager can review detailed sales reports, including metrics on revenue, total sales, and stock levels. This helps in making informed business decisions.
 
 ## Technologies Used
 
 - **Flask**: Python web framework used to build the backend and manage routing, data handling, and server-side logic for the application.
-
 - **TailwindCSS**: CSS framework for responsive and flexible UI/UX design.
-
 - **Firebase**: Cloud-based platform offering database and storage solutions to manage product data and user interactions.
-
 - **ApexCharts**: Library used for creating interactive and dynamic data charts.
 
 ## Installation
@@ -81,3 +87,7 @@ Follow the steps below to run this project locally:
 ## Usage
 
 Once the installation is complete, open your browser and go to `http://localhost:8000` to use the dashboard. You can explore cashier the dashboard to view the visualized manufacturing data using  **ApexCharts** , which provides interactive and dynamic charts based on the integrated data.
+
+### How to Integrate with Other Modules (Supplier & Distributor)
+
+1. Supplier

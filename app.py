@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session, current_app
+from flask import jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import firebase_admin
@@ -27,16 +28,42 @@ firebaseConfig = {
 }
 
 # Inisialisasi Firestore dengan Firebase Admin SDK
-cred = credentials.Certificate('retailptsepedaonthelsurabaya-firebase-adminsdk-hjdab-2987e4b3c3.json')
+cred = credentials.Certificate('retail.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+# Tentukan folder untuk menyimpan gambar
+UPLOAD_FOLDER = os.path.join('static', 'img')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+# Tambahkan folder upload di konfigurasi app
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Fungsi untuk memeriksa ekstensi file yang diizinkan
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def decrement_item_stock(db, item_name, quantity):
+    try:
+        items_ref = db.collection(u'items')
+        query = items_ref.where(u'name', u'==', item_name).get()
+
+        if query:
+            item_ref = query[0].reference
+            item_data = query[0].to_dict()
+
+            current_stock = int(item_data.get('amount', 0))
+            new_stock = max(current_stock - quantity, 0)
+
+            # Update stok di Firestore
+            item_ref.update({u'amount': str(new_stock)})
+        else:
+            flash(f"Item '{item_name}' not found in warehouse.", "error")
+    except Exception as e:
+        flash(f"Error updating stock for item '{item_name}': {str(e)}", "error")
 @app.route('/')
 def index():
     if 'logged_in' in session:
         return redirect(url_for('home'))
     return render_template('guestArea.html')
-
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
@@ -64,7 +91,6 @@ def signin():
     if 'logged_in' in session:
         return redirect(url_for('home'))
     return render_template('signin.html')
-
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
@@ -84,18 +110,6 @@ def signup():
         except Exception as e:
             flash('Error creating account: ' + str(e), 'error')
     return render_template('signup.html')
-
-# Tentukan folder untuk menyimpan gambar
-UPLOAD_FOLDER = os.path.join('static', 'img')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-
-# Tambahkan folder upload di konfigurasi app
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Fungsi untuk memeriksa ekstensi file yang diizinkan
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 @app.route('/addProduct', methods=['POST'])
 def addProduct():
     name = request.form.get('name')
@@ -222,7 +236,6 @@ def home():
         product_data['stock'] = product_stock
         product_list.append(product_data)
     return render_template('home.html', username=session.get('username'), products=product_list)
-
 @app.route('/product')
 def product():
     if 'logged_in' not in session:
@@ -259,7 +272,6 @@ def product():
         product_list.append(product_data)
 
     return render_template('product.html', username=session.get('username'), products=product_list)
-
 @app.route('/purchase_products', methods=['POST'])
 def purchase_products():
     selected_products = []
@@ -317,25 +329,6 @@ def purchase_products():
         flash("No products selected!", "error")
     
     return redirect(url_for('home'))
-def decrement_item_stock(db, item_name, quantity):
-    try:
-        items_ref = db.collection(u'items')
-        query = items_ref.where(u'name', u'==', item_name).get()
-
-        if query:
-            item_ref = query[0].reference
-            item_data = query[0].to_dict()
-
-            current_stock = int(item_data.get('amount', 0))
-            new_stock = max(current_stock - quantity, 0)
-
-            # Update stok di Firestore
-            item_ref.update({u'amount': str(new_stock)})
-        else:
-            flash(f"Item '{item_name}' not found in warehouse.", "error")
-    except Exception as e:
-        flash(f"Error updating stock for item '{item_name}': {str(e)}", "error")
-
 @app.route('/warehouse')
 def warehouse():
     if 'logged_in' not in session:
@@ -395,6 +388,120 @@ def edit_transaction(transaction_id):
         flash(f"Error updating transaction: {str(e)}", "error")
 
     return redirect(url_for('dashboard'))
+@app.route('/delete_transaction/<transaction_id>', methods=['POST'])
+def delete_transaction(transaction_id):
+    if 'logged_in' not in session:
+        return redirect(url_for('signin'))
 
+    db = firestore.client()
+
+    try:
+        transaction_ref = db.collection(u'purchases').document(transaction_id)
+        transaction_ref.delete()
+        
+        flash("Transaction deleted successfully!", "error")
+    except Exception as e:
+        flash(f"Error deleting transaction: {str(e)}", "error")
+
+    return redirect(url_for('dashboard'))
+
+
+# API
+
+@app.route('/api/transaction9', methods=['GET'])
+def get_purchases():
+    db = firestore.client()
+    purchases_ref = db.collection(u'purchases')
+    purchases = purchases_ref.stream()
+
+    purchase_list = []
+
+    # Loop through each purchase in the 'purchases' collection
+    for purchase in purchases:
+        purchase_data = purchase.to_dict()
+        purchase_data['id'] = purchase.id
+
+        # List to store detailed product information including prices
+        detailed_products = []
+        total_transaction_price = 0
+
+        for product in purchase_data.get('products', []):
+            product_id = product.get('id')
+            product_quantity = product.get('quantity')
+
+            # Fetch product details from the 'product' collection based on the product ID
+            product_ref = db.collection(u'product').document(product_id).get()
+            product_details = product_ref.to_dict()
+
+            if product_details:
+                product_price = float(product_details.get('price', 0))
+                total_price = product_quantity * product_price
+                total_transaction_price += total_price
+
+                # Add the product details including price and total price to the detailed product list
+                detailed_products.append({
+                    'name': product_details.get('name'),
+                    'quantity': product_quantity,
+                    'price': product_price,
+                    'total_price': total_price
+                })
+
+        purchase_data.pop('id', None)
+        purchase_data.pop('products', None)
+        # Add the detailed products back to the purchase data
+        purchase_data['detailed_products'] = detailed_products
+        purchase_data['total_transaction_price'] = total_transaction_price
+        purchase_list.append(purchase_data)
+
+    # Return the purchase list as JSON response
+    return jsonify({"transaction": purchase_list, "status": "success"}), 200
+
+@app.route('/api/transaction9', methods=['POST'])
+def post_products():
+    data = request.get_json()  # Ambil JSON dari body request
+    selected_products = data.get('products', [])
+    
+    if not selected_products:
+        return jsonify({"message": "No products selected!", "status": "error"}), 400
+    
+    db = firestore.client()
+    
+    try:
+        # Mulai pemrosesan pembelian
+        purchase_data = {
+            'user': data.get('user', 'anonymous'),
+            'products': selected_products,
+            'total_items': sum([p['quantity'] for p in selected_products]),
+            'storeName': 'Sepeda Onthel Skena',
+            'storeLoc': 'bali',
+            'timestamp': firestore.SERVER_TIMESTAMP,
+        }
+        
+        for product in selected_products:
+            product_id = product['id']
+            quantity = product['quantity']
+            
+            # Ambil data produk untuk mendapatkan requirement
+            product_ref = db.collection(u'product').document(product_id).get()
+            product_data = product_ref.to_dict()
+            
+            if product_data:
+                wheel_type = product_data.get('wheel')
+                frame_type = product_data.get('frame')
+                
+                # Kurangi stok wheel (Ban)
+                if wheel_type:
+                    decrement_item_stock(db, wheel_type, quantity)
+                
+                # Kurangi stok frame
+                if frame_type:
+                    decrement_item_stock(db, frame_type, quantity)
+        
+        # Tambahkan data pembelian ke database
+        db.collection(u'purchases').add(purchase_data)
+        return jsonify({"message": "Purchase successfully processed and warehouse updated!", "status": "success"}), 200
+    
+    except Exception as e:
+        return jsonify({"message": f"Error processing purchase: {str(e)}", "status": "error"}), 500
 if __name__ == "__main__":
     app.run(debug=True)
