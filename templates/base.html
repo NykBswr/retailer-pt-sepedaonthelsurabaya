@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/LogoWhite.svg') }}" />
+    <title>PT.Sepeda Onthel Surabaya</title>
+    <style>
+        /* CSS untuk handle sidebar visibility */
+        .hidden-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .visible-sidebar {
+            transform: translateX(0);
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+</head>
+
+<body class="h-auto w-full bg-white">
+    {% if request.path != url_for('signin') %}
+    {% include 'partials/nav.html' %}
+    {% endif %}
+    {% if request.path != '/' %}
+    {% include 'partials/sidebar.html' %}
+    {% endif %}
+    {% block content %}
+    {% endblock %}
+
+    <!-- Flowbite JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+
+            // Show the sidebar when clicking the toggle button
+            sidebarToggle.addEventListener('click', function (e) {
+                e.stopPropagation();
+                sidebar.classList.toggle('visible-sidebar');
+                sidebar.classList.toggle('hidden-sidebar');
+            });
+
+            // Hide the sidebar when clicking outside of it
+            document.addEventListener('click', function (e) {
+                if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                    // If click is outside sidebar and toggle button, hide the sidebar
+                    if (sidebar.classList.contains('visible-sidebar')) {
+                        sidebar.classList.add('hidden-sidebar');
+                        sidebar.classList.remove('visible-sidebar');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

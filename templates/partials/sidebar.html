@@ -1,0 +1,29 @@
+<div id="sidebar" class="fixed inset-y-0 left-0 w-[23vw] bg-gray-800 text-white hidden-sidebar z-50 rounded-tr-2xl">
+    <div class="w-full p-6 h-full flex flex-col justify-between items-between">
+        <div class="w-full h-auto">
+            <button id="sidebar-toggle" class="w-full flex justify-center items-center space-x-3 rtl:space-x-reverse"
+                type="button">
+                <img src="{{ url_for('static', filename='img/LogoWhite.svg') }}" class="h-10 w-auto" alt="Group Logo" />
+            </button>
+            <div class="mt-6">
+                <a href="{{ url_for('home') }}"
+                    class="text-base md:text-lg lg:text-xl font-semibold block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-600">Home</a>
+                <a href="{{ url_for('dashboard') }}"
+                    class="text-base md:text-lg lg:text-xl font-semibold block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-600">Dashboard</a>
+                <a href="{{ url_for('product') }}"
+                    class="text-base md:text-lg lg:text-xl font-semibold block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-600">Product</a>
+                <a href="{{ url_for('warehouse') }}"
+                    class="text-base md:text-lg lg:text-xl font-semibold block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-600">Warehouse</a>
+                <a href="{{ url_for('signup') }}"
+                    class="text-base md:text-lg lg:text-xl font-semibold block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-600">Create
+                    Cashier Account</a>
+            </div>
+        </div>
+        <form class="w-full" action="{{ url_for('signout') }}" method="post">
+            <button class="w-full text-base md:text-lg lg:text-xl font-semibold text-white rounded-md bg-gradient-to-tl
+                            from-secondary to-primary px-3 py-2">
+                Sign Out
+            </button>
+        </form>
+    </div>
+</div>

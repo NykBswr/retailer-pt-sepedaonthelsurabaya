@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="h-full w-full items-center justify-center p-12">
+    <div class="w-full h-auto flex justify-between items-center mt-14 mb-8">
+        <h1
+            class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[3vw] font-extrabold text-transparent">
+            Warehouse
+        </h1>
+    </div>
+    <div class="flex w-full h-full">
+        <div class="flex ml-2 flex-col rounded-md p-8 w-full overflow-y-auto h-[64vh] border-[5px] border-secondary">
+            <div class="w-full h-full overflow-y-auto">
+                <h1
+                    class="mb-5 bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[2vw] font-extrabold text-transparent">
+                    List Items
+                </h1>
+                <table class="w-full table-auto">
+                    <thead>
+                        <tr>
+                            <th>
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mr-1 px-3 py-2 text-start">
+                                    Name
+                                </h1>
+                            </th>
+                            <th>
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                    Description
+                                </h1>
+                            </th>
+                            <th>
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                    Price
+                                </h1>
+                            </th>
+                            <th>
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                    Amount
+                                </h1>
+                            </th>
+                            <th>
+                                <h1
+                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-center ml-1 px-3 py-2">
+                                    Order
+                                </h1>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                <div
+                                    class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mr-1 my-1 p-[2px]">
+                                    <h1 class="flex rounded-md border-0 bg-white px-1 py-2 text-xs font-medium
+                                        text-primary  outline-0 md:text-sm lg:text-base">
+                                        {{ item['name'] }}
+                                    </h1>
+                                </div>
+                            </td>
+                            <td>
+                                <div
+                                    class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                    <h1
+                                        class="flex rounded-md border-0 bg-white px-1 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                        Description
+                                    </h1>
+                                </div>
+                            </td>
+                            <td>
+                                <div
+                                    class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                    <h1
+                                        class="flex rounded-md border-0 bg-white px-1 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                        {{ item['price'] | currency }}
+                                    </h1>
+                                </div>
+                            </td>
+                            <td>
+                                <div
+                                    class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                    <h1
+                                        class="flex rounded-md border-0 bg-white px-1 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                        {{ item['amount'] }}
+                                    </h1>
+                                </div>
+                            </td>
+                            <td class="w-[13vw]">
+                                <div
+                                    class="w-[13vw] flex cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1 p-[2px]">
+                                    <div id="counter-{{ loop.index }}"
+                                        class="transition duration-500 group-hover:flex h-full w-[75%] justify-center items-center">
+                                        <div
+                                            class="h-full w-full flex justify-center items-center text-white font-semibold bg-transparent">
+                                            <div class="flex w-full h-full justify-center items-center">
+                                                <button type="button" id="decrement-button-{{ loop.index }}"
+                                                    data-input-counter-decrement="quantity-input-{{ item['name'] }}"
+                                                    class="bg-white rounded-md mr-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
+                                                    <svg class="text-primary w-2 h-2" aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 18 2">
+                                                        <path stroke="currentColor" stroke-linecap="round"
+                                                            stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                                                    </svg>
+                                                </button>
+                                                <input type="text" name="quantity-{{ item['name'] }}" data-input-counter
+                                                    id="quantity-input-{{ item['name'] }}"
+                                                    class="rounded-md bg-gray-50 border-x-0 h-auto text-center text-gray-900 text-sm focus:ring-secondary focus:border-secoring-secondary block w-[40%]"
+                                                    placeholder="0" required />
+                                                <button type="button" id="increment-button{{ loop.index }}"
+                                                    data-input-counter-increment="quantity-input-{{ item['name'] }}"
+                                                    class="bg-white rounded-md ml-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
+                                                    <svg class="text-primary w-2 h-2" aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 18 18">
+                                                        <path stroke="currentColor" stroke-linecap="round"
+                                                            stroke-linejoin="round" stroke-width="2"
+                                                            d="M9 1v16M1 9h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="w-[25%] ml-2 justify-center items-center flex rounded-md border-0 bg-white px-1
+                                        py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
+                                        hover:text-white ">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 18 18">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

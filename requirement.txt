@@ -1,0 +1,6 @@
+pyrebase4
+werkzeug
+firebase_admin
+Flask
+pandas
+numpy

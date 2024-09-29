@@ -1,0 +1,27 @@
+<nav class="fixed w-full border-dark bg-white px-12 py-5 shadow-md z-40">
+    <div class="flex items-center justify-between">
+        <button id="sidebar-toggle" class="flex items-center space-x-3 rtl:space-x-reverse" type="button">
+            <img src="{{ url_for('static', filename='img/Button.svg') }}" class="h-5 w-auto" alt="Group Logo" />
+        </button>
+        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+            <ul
+                class="md border-primay mt-4 flex flex-col rounded-lg border bg-gray-50 p-4 font-medium rtl:space-x-reverse md:mt-0 md:flex-row md:space-x-8 md:border-0 md:bg-white md:p-0">
+                <li class="flex items-center">
+                    {% if session['logged_in'] %}
+                    <div class="flex w-auto items-center">
+                        <h1 class="text-base md:text-lg lg:text-xl font-semibold mr-2">{{ session['username'] }}</h1>
+                        <button id="sidebar-toggle"
+                            class="w-full flex justify-center items-center space-x-3 rtl:space-x-reverse" type="button">
+                            <img src="{{ url_for('static', filename='img/LogoWhite.svg') }}" class="h-10 w-auto"
+                                alt="Group Logo" />
+                        </button>
+                    </div>
+                    {% else %}
+                    <a class="text-sm md:text-base lg:text-lg font-semibold text-white rounded-md bg-gradient-to-tl from-secondary to-primary px-3 py-2"
+                        href="{{ url_for('signin') }}">Sign In</a>
+                    {% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

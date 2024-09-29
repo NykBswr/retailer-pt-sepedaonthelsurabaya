@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="h-full w-full items-center justify-center p-12">
+    <div class="w-full h-auto flex justify-between items-center mt-14 mb-8">
+        <h1
+            class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[3vw] font-extrabold text-transparent">
+            Product
+        </h1>
+    </div>
+    <div class="flex w-full h-full">
+        <div class="flex mr-2 flex-col rounded-md p-8 w-1/2 h-[64vh] border-[5px] border-secondary">
+            <h1
+                class="mb-2 bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[2vw] font-extrabold text-transparent">
+                Add Product
+            </h1>
+            <form class="w-full h-auto" action="{{ url_for('addProduct') }}" method="post"
+                enctype="multipart/form-data">
+                <div class="w-full h-[38vh] overflow-y-auto pr-2">
+                    {% with messages = get_flashed_messages(with_categories=True) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div
+                        class="mb-3 {% if category == 'success' %} text-green-600 {% elif category == 'error' %} text-red-600 {% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                    <h1 class="text-sm md:text-base text-primary lg:text-lg font-semibold mb-2">
+                        Product Name
+                    </h1>
+                    <div class="mb-2 w-full rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                        <input
+                            class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                            type="text" name="name" placeholder="Input Product Name" autofocus required>
+                    </div>
+                    <h1 class="text-sm md:text-base text-primary lg:text-lg font-semibold mb-2">
+                        Requirement
+                    </h1>
+                    <!-- Wheel -->
+                    <div class="mb-3 w-full">
+                        <div class="w-full cursor-pointer bg-gradient-to-tl from-secondary to-primary rounded-md p-[2px]"
+                            id="wheelSelector">
+                            <div class="flex items-center justify-between bg-white rounded-md">
+                                <h1 class="px-3 py-2 text-primary font-medium text-xs md:text-sm lg:text-base"
+                                    id="selectedwheelText">
+                                    Select Wheels*
+                                </h1>
+                                <svg class="mr-2 h-[1vh] md:h-[2vh] w-auto text-primary transform transition-transform duration-300 rotate-180"
+                                    id="wheelArrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="absolute mt-1 w-[40.5vw] rounded-md overflow-hidden z-10 hidden" id="wheelDropdown">
+                            <div class="bg-gradient-to-tl from-secondary to-primary p-1">
+                                <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1" id="wheelList">
+                                    <!-- Wheel List will be populated here -->
+                                </ul>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedwheelInput" name="wheel" value="">
+                        <script>
+                            // List of wheels
+                            const wheels = [{
+                                    wheel: "Ban A"
+                                },
+                                {
+                                    wheel: "Ban B"
+                                }
+                            ];
+
+                            // Variables for managing state
+                            let selectedwheel = null;
+                            let iswheelOpen = false;
+
+                            const wheelSelector = document.getElementById('wheelSelector');
+                            const wheelDropdown = document.getElementById('wheelDropdown');
+                            const wheelList = document.getElementById('wheelList');
+                            const wheelArrow = document.getElementById('wheelArrow');
+                            const selectedwheelText = document.getElementById('selectedwheelText');
+                            const selectedwheelInput = document.getElementById('selectedwheelInput'); // Hidden input
+
+                            // Toggle dropdown visibility
+                            wheelSelector.addEventListener('click', () => {
+                                iswheelOpen = !iswheelOpen;
+                                if (iswheelOpen) {
+                                    wheelDropdown.classList.remove('hidden');
+                                    wheelDropdown.classList.add('visible');
+                                    wheelArrow.classList.remove('rotate-180');
+                                    wheelArrow.classList.add('rotate-0');
+                                } else {
+                                    wheelDropdown.classList.remove('visible');
+                                    wheelDropdown.classList.add('hidden');
+                                    wheelArrow.classList.remove('rotate-0');
+                                    wheelArrow.classList.add('rotate-180');
+                                }
+                            });
+
+                            // Populate wheel list
+                            wheels.forEach((wheelObj) => {
+                                const wheelItem = document.createElement('li');
+                                wheelItem.textContent = wheelObj.wheel;
+                                wheelItem.className =
+                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                                wheelItem.addEventListener('click', () => {
+                                    selectedwheel = wheelObj.id;
+                                    selectedwheelText.textContent = wheelObj.wheel;
+
+                                    // Set value to hidden input
+                                    selectedwheelInput.value = wheelObj.wheel;
+
+                                    iswheelOpen = false;
+                                    wheelDropdown.classList.add('hidden');
+                                    wheelDropdown.classList.remove('visible');
+                                    wheelArrow.classList.remove('rotate-0');
+                                    wheelArrow.classList.add('rotate-180');
+                                });
+                                wheelList.appendChild(wheelItem);
+                            });
+                        </script>
+                        </script>
+                    </div>
+                    <!-- Frame -->
+                    <div class="mb-3 w-full">
+                        <div class="w-full cursor-pointer bg-gradient-to-tl from-secondary to-primary rounded-md p-[2px]"
+                            id="frameSelector">
+                            <div class="flex items-center justify-between bg-white rounded-md">
+                                <h1 class="px-3 py-2 text-primary font-medium text-xs md:text-sm lg:text-base"
+                                    id="selectedframeText">
+                                    Select Frames*
+                                </h1>
+                                <svg class="mr-2 h-[1vh] md:h-[2vh] w-auto text-primary transform transition-transform duration-300 rotate-180"
+                                    id="frameArrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="absolute mt-1 w-[40.5vw] rounded-md overflow-hidden z-10 hidden" id="frameDropdown">
+                            <div class="bg-gradient-to-tl from-secondary to-primary p-1">
+                                <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1" id="frameList">
+                                    <!-- Frame List will be populated here -->
+                                </ul>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selectedframeInput" name="frame" value="">
+                        <script>
+                            // List of frames
+                            const frames = [{
+                                    frame: "Frame A"
+                                },
+                                {
+                                    frame: "Frame B"
+                                }
+                            ];
+
+                            // Variables for managing state
+                            let selectedframe = null;
+                            let isframeOpen = false;
+
+                            const frameSelector = document.getElementById('frameSelector');
+                            const frameDropdown = document.getElementById('frameDropdown');
+                            const frameList = document.getElementById('frameList');
+                            const frameArrow = document.getElementById('frameArrow');
+                            const selectedframeText = document.getElementById('selectedframeText');
+                            const selectedframeInput = document.getElementById('selectedframeInput'); // Hidden input
+
+                            // Toggle dropdown visibility
+                            frameSelector.addEventListener('click', () => {
+                                isframeOpen = !isframeOpen;
+                                if (isframeOpen) {
+                                    frameDropdown.classList.remove('hidden');
+                                    frameDropdown.classList.add('visible');
+                                    frameArrow.classList.remove('rotate-180');
+                                    frameArrow.classList.add('rotate-0');
+                                } else {
+                                    frameDropdown.classList.remove('visible');
+                                    frameDropdown.classList.add('hidden');
+                                    frameArrow.classList.remove('rotate-0');
+                                    frameArrow.classList.add('rotate-180');
+                                }
+                            });
+
+                            // Populate frame list
+                            frames.forEach((frameObj) => {
+                                const frameItem = document.createElement('li');
+                                frameItem.textContent = frameObj.frame;
+                                frameItem.className =
+                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                                frameItem.addEventListener('click', () => {
+                                    selectedframe = frameObj.id;
+                                    selectedframeText.textContent = frameObj.frame;
+
+                                    // Set value to hidden input
+                                    selectedframeInput.value = frameObj.frame;
+
+                                    isframeOpen = false;
+                                    frameDropdown.classList.add('hidden');
+                                    frameDropdown.classList.remove('visible');
+                                    frameArrow.classList.remove('rotate-0');
+                                    frameArrow.classList.add('rotate-180');
+                                });
+                                frameList.appendChild(frameItem);
+                            });
+                        </script>
+                    </div>
+                    <h1 class="text-sm md:text-base text-primary lg:text-lg font-semibold mb-2" for="multiple_files">
+                        Upload Image
+                    </h1>
+                    <div class="w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                        <input
+                            class="block w-full rounded-md border-0 bg-white text-xs font-medium text-primary outline-0 placeholder:text-primary md:text-sm lg:text-base cursor-pointer"
+                            id="multiple_files" type="file" name="image" required>
+                    </div>
+                    <p class="mt-1 mb-2 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or
+                        WEBP
+                        (MAX. 800x400px).</p>
+                    <h1 class="text-sm md:text-base text-primary lg:text-lg font-semibold mb-2">
+                        Price
+                    </h1>
+                    <div
+                        class="mb-2 w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                        <input
+                            class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                            type="text" name="price" id="price-input" placeholder="Input Price" required />
+                    </div>
+
+                    <script>
+                        const priceInput = document.getElementById('price-input');
+
+                        priceInput.addEventListener('input', function (e) {
+                            let value = priceInput.value;
+
+                            // Hapus karakter yang bukan angka
+                            value = value.replace(/[^0-9]/g, '');
+
+                            // Tambahkan tanda pemisah ribuan
+                            value = new Intl.NumberFormat('id-ID').format(value);
+                            value = value.replace(/\./g, ',');
+                            // Set nilai yang terformat ke input field dengan menambahkan 'Rp.' di depannya
+                            priceInput.value = 'Rp. ' + value;
+                        });
+                    </script>
+                </div>
+
+                <button
+                    class="mt-5 w-full h-auto text-base md:text-lg lg:text-xl font-bold text-white rounded-md bg-gradient-to-tl from-secondary to-primary px-3 py-2">
+                    Add
+                </button>
+            </form>
+        </div>
+        <div class="flex ml-2 flex-col rounded-md p-8 w-1/2 h-[64vh] border-[5px] border-secondary">
+            <div class="w-full h-full">
+                <h1
+                    class="mb-5 bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[2vw] font-extrabold text-transparent">
+                    List Product
+                </h1>
+                <div class="overflow-y-auto h-[45vh] pr-2">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mr-1 px-3 py-2 text-start">
+                                        Name
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                        Price
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-start mx-1 px-3 py-2">
+                                        Stock
+                                    </h1>
+                                </th>
+                                <th class="w-[3.5vw]">
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-center ml-1 px-3 py-2">
+                                        Edit
+                                    </h1>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in products %}
+                            <tr>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mr-1 my-1 p-[2px]">
+                                        <h1 class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium
+                                        text-primary outline-0 md:text-sm lg:text-base">
+                                            {{ product['name'] }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <h1
+                                            class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                            {{ product['price'] | currency }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <h1
+                                            class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                            {{ product['stock'] }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary
+                                    to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1 p-[2px]">
+                                        <button class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1
+                                        py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
+                                        hover:text-white ">
+                                            <svg class="w-5 h-full" aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                fill="currentColor" viewBox="0 0 24 24">
+                                                <path fill-rule="evenodd"
+                                                    d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z"
+                                                    clip-rule="evenodd" />
+                                                <path fill-rule="evenodd"
+                                                    d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

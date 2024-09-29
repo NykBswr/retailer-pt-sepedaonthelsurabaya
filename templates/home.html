@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="h-full w-full items-center justify-center p-12">
+    <form id="product-form" method="POST" action="{{ url_for('purchase_products') }}">
+        <div class="w-full h-auto flex justify-between items-center mt-14 mb-12 ">
+            <h1
+                class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[5vw] font-extrabold text-transparent">
+                Cashier
+            </h1>
+            <button id="checkout-button"
+                class="text-base md:text-lg lg:text-xl font-semibold w-auto h-auto text-white rounded-md bg-gradient-to-tl from-secondary to-primary px-5 py-3">
+                Check Out
+            </button>
+        </div>
+        <div class="flex flex-col rounded-md p-12 w-full h-full border-[5px] border-secondary">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {% for product in products %}
+                <div id="counter-container-{{ loop.index }}"
+                    class="group2 group flex h-full w-full items-end rounded-md bg-gray-100 shadow-lg hover:z-10">
+                    <img class="h-full w-full rounded-md transition duration-300 group-hover:grayscale"
+                        src="{{ url_for('static', filename='img/' + product['image']) }}" alt="{{ product['name'] }}">
+                    <div
+                        class="absolute flex justify-center items-start flex-col z-[1] mb-4 ml-4 h-[12vh] w-[14.5vw] rounded bg-white px-3 py-2 text-justify text-dark shadow transition-all duration-300">
+                        <!-- Default content -->
+                        <h1 class="text-base font-bold md:text-lg lg:text-xl group-hover:hidden">{{ product['name'] }}
+                        </h1>
+                        <p class="text-justify font-normal text-lg text-dark group-hover:hidden">
+                            {{ product['price'] | currency }}</p>
+                        {% if product['stock'] > 0 %}
+                        <div id="counter-{{ loop.index }}" class="transition duration-500 hidden group-hover:flex h-full w-full justify-center
+                            items-center">
+                            <div class="h-[6vh] w-[80%] flex justify-center items-center text-white font-semibold rounded-md
+                            bg-gradient-to-tl from-secondary to-primary ">
+                                <div class="flex w-full h-full justify-center items-center">
+                                    <button type="button" id="decrement-button-{{ loop.index }}"
+                                        data-input-counter-decrement="quantity-input-{{ product['id'] }}"
+                                        class="text-white hover:text-dark hover:bg-secondary bg-gradient-to-tl from-secondary to-primary rounded-s-lg p-4 h-full w-[30%] focus:outline-none">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 18 2">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="text" name="quantity-{{ product['id'] }}" data-input-counter
+                                        id="quantity-input-{{ product['id'] }}"
+                                        class="bg-gray-50 border-x-0 h-auto text-center text-gray-900 text-sm focus:ring-secondary focus:border-secoring-secondary block w-[40%] py-2.5"
+                                        placeholder="0" required />
+                                    <button type="button" id="increment-button{{ loop.index }}"
+                                        data-input-counter-increment="quantity-input-{{ product['id'] }}"
+                                        class="text-white hover:text-dark hover:bg-secondary bg-gradient-to-tl from-secondary to-primary rounded-e-lg p-4 h-full w-[30%] focus:outline-none">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                            fill="none" viewBox="0 0 18 18">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                                stroke-width="2" d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div
+                            class="transition hidden group-hover:flex duration-500 h-full w-full justify-center items-center">
+                            <span class="text-red-500 font-bold text-xl">Sold Out</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <input type="hidden" name="product_id-{{ product['id'] }}" value="{{ product['id'] }}">
+                <input type="hidden" name="product_name-{{ product['id'] }}" value="{{ product['name'] }}">
+                <input type="hidden" name="product_price-{{ product['id'] }}" value="{{ product['price'] }}">
+                <!-- <script>
+                    function updateCounterDisplay(inputElement, productName, productPrice, buttonElement) {
+                        const value = inputElement.value;
+                        const quantity = value === "" ? 0 : parseInt(value);
+
+                        console.log(value);
+                        if (quantity > 0) {
+                            productName.classList.remove('group-hover:hidden');
+                            productPrice.classList.remove('group-hover:hidden');
+                            productName.classList.add('hidden');
+                            productPrice.classList.add('hidden');
+                            buttonElement.classList.remove('group-hover:flex');
+                            buttonElement.classList.remove('hidden');
+                            buttonElement.classList.add('flex');
+                        } else if (quantity = 0) {
+                            productName.classList.add('group-hover:hidden');
+                            productPrice.classList.add('group-hover:hidden');
+                            productName.classList.remove('hidden');
+                            productPrice.classList.remove('hidden');
+                            buttonElement.classList.add('group-hover:flex');
+                            buttonElement.classList.add('hidden');
+                            buttonElement.classList.remove('flex');
+                        }
+                    }
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const inputElement = document.getElementById(`quantity-input-${productId}`);
+                        const productName = document.querySelector("#counter-container-{{ loop.index }} h1");
+                        const productPrice = document.querySelector("#counter-container-{{ loop.index }} p");
+                        const buttonElement = document.getElementById("counter-{{ loop.index }}");
+                        updateCounterDisplay(inputElement, productName, productPrice, buttonElement);
+
+                        // Event listener untuk memantau perubahan pada input
+                        inputElement.addEventListener('input', function () {
+                            updateCounterDisplay(inputElement, productName, productPrice,
+                                buttonElement);
+                        });
+                    });
+                </script> -->
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+    <div id="confirmation-modal"
+        class="hidden fixed modal-container blur-background overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
+        <div class="w-full h-full flex justify-center items-center relative">
+            <div class="box-gradient-border-third p-8 rounded-lg w-[40vw]">
+                <h2 class="text-xl font-bold mb-4">Purchase Confirmation</h2>
+                <table id="product-table">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mr-1 px-3 py-2 text-start">
+                                        Name
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                        Quantity
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                        Price
+                                    </h1>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="selected-products-list">
+                            <!-- Product rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </table>
+                <div class="mt-4 w-full flex flex-row justify-end">
+                    <button
+                        class="text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-red-500"
+                        id="cancel-purchase">
+                        Cancel
+                    </button>
+                    <button class="text-xl font-semibold ml-2 bg-gradient-to-tl from-secondary to-primary text-white px-4
+                        py-2 rounded-md hover:bg-primary" id="confirm-purchase">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('checkout-button').addEventListener('click', function () {
+            const productForm = document.getElementById('product-form');
+            const selectedProductsList = document.getElementById('selected-products-list');
+            const modal = document.getElementById('confirmation-modal');
+            selectedProductsList.innerHTML = '';
+
+            const formData = new FormData(productForm);
+            const products = [];
+            let totalPrice = 0;
+
+            // Loop untuk mengambil semua produk yang dipilih dengan jumlahnya
+            formData.forEach((value, key) => {
+                if (key.startsWith('quantity-') && value > 0) {
+                    const productId = key.replace('quantity-', '');
+                    const productName = formData.get('product_name-' + productId);
+                    const productPrice = formData.get('product_price-' + productId);
+                    const productQuantity = value;
+
+                    // Tambahkan produk ke daftar
+                    products.push({
+                        name: productName,
+                        price: productPrice,
+                        quantity: productQuantity
+                    });
+                }
+            });
+
+            // Jika ada produk yang dipilih, tampilkan dalam modal
+            if (products.length > 0) {
+                products.forEach(product => {
+                    const productRow = document.createElement('tr'); // Buat elemen tr
+
+                    // Buat elemen td untuk nama produk
+                    const productNameCell = document.createElement('td');
+                    productNameCell.innerHTML = `
+                        <div
+                            class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mr-1 my-1 p-[2px]">
+                            <h1
+                                class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-primary outline-0 md:text-sm lg:text-base">
+                                ${product.name}
+                            </h1>
+                        </div>`;
+
+                    // Buat elemen td untuk jumlah produk
+                    const productQuantityCell = document.createElement('td');
+                    productQuantityCell.innerHTML = `
+                        <div
+                            class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                            <h1
+                                class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                ${product.quantity}
+                            </h1>
+                        </div>`;
+
+                    // Buat elemen td untuk harga produk
+                    const productPriceCell = document.createElement('td');
+                    productPriceCell.innerHTML = `
+                        <div
+                            class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                            <h1
+                                class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                                Rp ${Number(product.price).toLocaleString()}
+                            </h1>
+                        </div>`;
+
+                    // Hitung subtotal untuk produk ini (jumlah * harga per unit)
+                    const subtotal = product.quantity * product.price;
+
+                    // Tambahkan subtotal ke total harga
+                    totalPrice += subtotal;
+
+                    // Tambahkan sel ke dalam baris
+                    productRow.appendChild(productNameCell);
+                    productRow.appendChild(productQuantityCell);
+                    productRow.appendChild(productPriceCell);
+
+                    // Tambahkan baris ke tbody
+                    selectedProductsList.appendChild(productRow);
+                });
+
+                // Tambahkan baris total harga
+                const totalRow = document.createElement('tr');
+                const totalLabelCell = document.createElement('td');
+                totalLabelCell.setAttribute('colspan', '2');
+                totalLabelCell.innerHTML = `
+                <h1
+                    class="bg-gradient-to-tl from-secondary to-primary font-extrabold text-white rounded-md text-lg mr-1 px-3 py-2 text-start">
+                    Total Harga:
+                </h1>`;
+                const totalPriceCell = document.createElement('td');
+                totalPriceCell.innerHTML = `
+                <div
+                    class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                    <h1
+                        class="flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium outline-0 text-primary md:text-sm lg:text-base">
+                        Rp ${totalPrice.toLocaleString()}
+                    </h1>
+                </div>`;
+
+                totalRow.appendChild(totalLabelCell);
+                totalRow.appendChild(totalPriceCell);
+                selectedProductsList.appendChild(totalRow);
+
+                // Tampilkan modal
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                alert('No products selected!');
+            }
+        });
+
+        // Tombol untuk membatalkan pembelian
+        document.getElementById('cancel-purchase').addEventListener('click', function () {
+            const modal = document.getElementById('confirmation-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        });
+
+        // Tombol untuk mengonfirmasi pembelian
+        document.getElementById('confirm-purchase').addEventListener('click', function () {
+            const productForm = document.getElementById('product-form');
+            productForm.submit();
+        });
+    </script>
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div id="modal-1" class="modal-container blur-background overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[10001]
+        justify-center items-center w-full md:inset-0 h-full">
+        <div class="w-full h-full flex justify-center items-center relative">
+            <div
+                class="{% if category == 'error' %} border-red-500 border-2 rounded-md sm:w-auto max-w-[80vw] sm:max-w-none {% else %} w-auto min-w-[60vw] max-w-[80vw] md:max-w-[65vw] {% endif %}">
+                <div
+                    class="relative rounded-md shadow {% if category == 'error' %} w-full h-full bg-red-50 {% else %} flex flex-col justify-center box-gradient-border-third p-3 {% endif %}">
+                    <div
+                        class="flex items-center justify-between border-b rounded-t {% if category == 'error' %} px-4 py-2 md:px-5 border-red-200 {% else %} p-4 md:p-5 {% endif %}">
+                        <h3
+                            class="font-bold {% if category == 'error' %} text-xs md:text-base lg:text-lg text-red-500 {% else %} text-sm md:text-lg lg:text-xl text-primary {% endif %}">
+                            {% set category, message = messages[0] %}
+                            {% if category == 'success' %}
+                            Success
+                            {% elif category == 'error' %}
+                            Error
+                            {% endif %}
+                        </h3>
+                        <button class="close-modal rounded-md text-sm w-8 h-8 ms-auto inline-flex justify-center
+                            items-center {% if category == 'error' %}text-red-400 bg-transparent hover:bg-red-200
+                            hover:text-red-900 {% else %} boxes-svg2 text-dark hover:text-white{% endif %}">
+                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 14 14">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                            </svg>
+                            <span class="sr-only">Close modal</span>
+                        </button>
+                    </div>
+                    <div class="{% if category == 'error' %} py-2 px-4 md:px-6 {% else %} p-4 md:p-6 {% endif %}">
+                        <div class="w-full h-full flex justify-start items-center z-100">
+                            {% for category, message in messages %}
+                            <div
+                                class="text-xl font-semibold mb-3 {% if category == 'success' %} text-green-600 {% elif category == 'error' %} text-red-600 {% endif %}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Tambahkan event listener untuk menutup modal ketika tombol 'Close' diklik
+        document.querySelectorAll('.close-modal').forEach(button => {
+            button.addEventListener('click', function () {
+                const modalElement = document.getElementById('modal-1'); // Ambil modal by ID
+
+                // Sembunyikan modal dengan menghapus elemen dari DOM atau menambah class 'hidden'
+                if (modalElement) {
+                    modalElement.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+    {% endif %}
+    {% endwith %}
+</section>
+{% endblock %}

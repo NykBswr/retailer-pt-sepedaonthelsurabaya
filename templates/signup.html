@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block content %}
+<section id="signin" class="flex h-screen w-screen items-center justify-center pt-32">
+    <div class="flex h-full w-full flex-col items-center justify-between">
+        <!-- <div class="mt-10 flex h-full w-full items-center justify-center">
+            <img class="h-[10vh] w-auto" src="static/img/LogoWhite.svg" alt="Logo">
+        </div> -->
+
+        <h1 class='w-[28vw] mb-20 text-center text-2xl font-extrabold sm:text-3xl md:text-4xl lg:text-5xl
+            bg-gradient-to-tl from-secondary to-primary bg-clip-text text-transparent'>
+            Create New Cashier Account
+        </h1>
+
+        <form method="POST" action="{{ url_for('signup') }}"
+            class="flex h-auto w-[65vw] flex-col items-center justify-center sm:w-[50vw] md:w-[35vw] lg:w-[28vw]">
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div
+                class="mb-3 {% if category == 'success' %} text-green-600 {% elif category == 'error' %} text-red-600 {% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="mb-3 w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                <input
+                    class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                    type="text" name="username" placeholder="Username*" autofocus required>
+            </div>
+            <div class="mb-3 w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                <input
+                    class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                    type="text" name="email" placeholder="Email*" required>
+            </div>
+
+            <div class="mb-3 w-full">
+                <div class="w-full cursor-pointer bg-gradient-to-tl from-secondary to-primary rounded-md p-[2px]"
+                    id="roleSelector">
+                    <div class="flex items-center justify-between bg-white rounded-md">
+                        <h1 class="px-3 py-2 text-primary font-medium text-xs md:text-sm lg:text-base"
+                            id="selectedRoleText">
+                            Role*
+                        </h1>
+                        <svg class="mr-2 h-[2vh] md:h-[3vh] w-auto text-primary transform transition-transform duration-300 rotate-180"
+                            id="roleArrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
+                            viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="absolute mt-1 w-[28vw] rounded-md overflow-hidden z-10 hidden" id="roleDropdown">
+                    <div class="bg-gradient-to-tl from-secondary to-primary p-1">
+                        <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1" id="roleList">
+                            <!-- Role List will be populated here -->
+                        </ul>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedRoleInput" name="role" value="">
+                <script>
+                    // List of roles
+                    const roles = [{
+                            id: 1,
+                            role: "Admin"
+                        },
+                        {
+                            id: 2,
+                            role: "Cashier"
+                        }
+                    ];
+
+                    // Variables for managing state
+                    let selectedRole = null;
+                    let isRoleOpen = false;
+
+                    const roleSelector = document.getElementById('roleSelector');
+                    const roleDropdown = document.getElementById('roleDropdown');
+                    const roleList = document.getElementById('roleList');
+                    const roleArrow = document.getElementById('roleArrow');
+                    const selectedRoleText = document.getElementById('selectedRoleText');
+                    const selectedRoleInput = document.getElementById('selectedRoleInput'); // Hidden input
+
+                    // Toggle dropdown visibility
+                    roleSelector.addEventListener('click', () => {
+                        isRoleOpen = !isRoleOpen;
+                        if (isRoleOpen) {
+                            roleDropdown.classList.remove('hidden');
+                            roleDropdown.classList.add('visible');
+                            roleArrow.classList.remove('rotate-180');
+                            roleArrow.classList.add('rotate-0');
+                        } else {
+                            roleDropdown.classList.remove('visible');
+                            roleDropdown.classList.add('hidden');
+                            roleArrow.classList.remove('rotate-0');
+                            roleArrow.classList.add('rotate-180');
+                        }
+                    });
+
+                    // Populate role list
+                    roles.forEach((roleObj) => {
+                        const roleItem = document.createElement('li');
+                        roleItem.textContent = roleObj.role;
+                        roleItem.className =
+                            "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                        roleItem.addEventListener('click', () => {
+                            selectedRole = roleObj.id;
+                            selectedRoleText.textContent = roleObj.role;
+
+                            // Set value to hidden input
+                            selectedRoleInput.value = roleObj.role;
+
+                            isRoleOpen = false;
+                            roleDropdown.classList.add('hidden');
+                            roleDropdown.classList.remove('visible');
+                            roleArrow.classList.remove('rotate-0');
+                            roleArrow.classList.add('rotate-180');
+                        });
+                        roleList.appendChild(roleItem);
+                    });
+                </script>
+                </script>
+            </div>
+            <div class="mb-3 w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                <input
+                    class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                    type="password" name="password" placeholder="Password*" required>
+            </div>
+
+            <button type="submit" class='w-full rounded-md font-semibold text-white hover:opacity-80'>
+                <h1 class="h-full w-full rounded-md bg-gradient-to-tl from-secondary to-primary px-3 py-2">
+                    Sign Up
+                </h1>
+            </button>
+        </form>
+
+        <div class='mb-5 flex h-full flex-col justify-end'>
+            <h1 class='text-xs text-primary lg:text-sm'>
+                <a href="#">Terms of Use</a> | <a href="#">Privacy Policy</a>
+            </h1>
+        </div>
+    </div>
+</section>
+{% endblock %}
