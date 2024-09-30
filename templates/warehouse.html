@@ -46,7 +46,7 @@
                                             class="text-white font-bold text-left px-3 py-2 outline-0 md:text-base lg:text-lg">
                                             Wheel</h1>
                                         <svg id="wheelArrow"
-                                            class="mr-5 h-[2vh] md:h-[3vh] w-auto text-white transform transition-transform duration-300 rotate-0"
+                                            class="mr-5 h-[2vh] md:h-[3vh] w-auto text-white transform transition-transform duration-300 rotate-180"
                                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                             viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -116,12 +116,12 @@
                                     iswheelOpen = !iswheelOpen;
                                     if (iswheelOpen) {
                                         wheelList.classList.remove('hidden');
-                                        wheelArrow.classList.remove('rotate-180');
-                                        wheelArrow.classList.add('rotate-0');
-                                    } else {
-                                        wheelList.classList.add('hidden');
                                         wheelArrow.classList.remove('rotate-0');
                                         wheelArrow.classList.add('rotate-180');
+                                    } else {
+                                        wheelList.classList.add('hidden');
+                                        wheelArrow.classList.remove('rotate-180');
+                                        wheelArrow.classList.add('rotate-0');
                                     }
                                 });
                             </script>
@@ -134,10 +134,9 @@
                                         <h1
                                             class="text-white font-bold text-left px-3 py-2 outline-0 md:text-base lg:text-lg">
                                             Frame</h1>
-                                        <svg id="frameArrow"
-                                            class="mr-5 h-[2vh] md:h-[3vh] w-auto text-white transform transition-transform duration-300 rotate-0"
-                                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                            viewBox="0 0 24 24">
+                                        <svg id="frameArrow" class="rotate-180 mr-5 h-[2vh] md:h-[3vh] w-auto text-white transform
+                                            transition-transform duration-300" xmlns="http://www.w3.org/2000/svg"
+                                            width="24" height="24" fill="none" viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                                 stroke-width="2"
                                                 d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
@@ -150,7 +149,7 @@
                                         p-[2px]" id="buyItems-Supplier2">
                                         <button class="w-full justify-center items-center flex rounded-md border-0 bg-white px-1
                                         py-[0.85rem] outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
-                                        hover:text-white ">
+                                        hover:text-white">
                                             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                                 fill="none" viewBox="0 0 18 18">
                                                 <path stroke="currentColor" stroke-linecap="round"
@@ -205,12 +204,12 @@
                                     isframeOpen = !isframeOpen;
                                     if (isframeOpen) {
                                         frameList.classList.remove('hidden');
-                                        frameArrow.classList.remove('rotate-180');
-                                        frameArrow.classList.add('rotate-0');
-                                    } else {
-                                        frameList.classList.add('hidden');
                                         frameArrow.classList.remove('rotate-0');
                                         frameArrow.classList.add('rotate-180');
+                                    } else {
+                                        frameList.classList.add('hidden');
+                                        frameArrow.classList.remove('rotate-180');
+                                        frameArrow.classList.add('rotate-0');
                                     }
                                 });
                             </script>
@@ -224,7 +223,7 @@
                                             class="text-white font-bold text-left px-3 py-2 outline-0 md:text-base lg:text-lg">
                                             Spare Part</h1>
                                         <svg id="sparePartArrow"
-                                            class="mr-5 h-[2vh] md:h-[3vh] w-auto text-white transform transition-transform duration-300 rotate-0"
+                                            class="mr-5 h-[2vh] md:h-[3vh] w-auto text-white transform transition-transform duration-300 rotate-180"
                                             xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                             viewBox="0 0 24 24">
                                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
@@ -248,6 +247,26 @@
                                         </button>
                                     </div>
                                 </td>
+                                <script>
+                                    let issparePartOpen = true;
+                                    const sparePartDropdown = document.getElementById('sparePartDropdown');
+                                    const sparePartList = document.getElementById('sparePartList');
+                                    const sparePartArrow = document.getElementById('sparePartArrow');
+
+                                    // Toggle dropdown visibility
+                                    sparePartDropdown.addEventListener('click', () => {
+                                        issparePartOpen = !issparePartOpen;
+                                        if (issparePartOpen) {
+                                            sparePartList.classList.remove('hidden');
+                                            sparePartArrow.classList.remove('rotate-0');
+                                            sparePartArrow.classList.add('rotate-180');
+                                        } else {
+                                            sparePartList.classList.add('hidden');
+                                            sparePartArrow.classList.remove('rotate-180');
+                                            sparePartArrow.classList.add('rotate-0');
+                                        }
+                                    });
+                                </script>
                             </tr>
                         </tbody>
                     </table>
