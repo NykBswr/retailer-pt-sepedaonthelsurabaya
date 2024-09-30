@@ -59,6 +59,26 @@ def decrement_item_stock(db, item_name, quantity):
             flash(f"Item '{item_name}' not found in warehouse.", "error")
     except Exception as e:
         flash(f"Error updating stock for item '{item_name}': {str(e)}", "error")
+def restore_item_stock(db, item_name, quantity):
+    """Restore the item stock in the warehouse."""
+    try:
+        items_ref = db.collection(u'items')
+        query = items_ref.where(u'name', u'==', item_name).get()
+
+        if query:
+            item_ref = query[0].reference
+            item_data = query[0].to_dict()
+
+            # Get the current stock and add the quantity back to the warehouse
+            current_stock = int(item_data.get('amount', 0))
+            new_stock = current_stock + quantity
+
+            # Update stock in Firestore
+            item_ref.update({u'amount': str(new_stock)})
+        else:
+            flash(f"Item '{item_name}' not found in warehouse.", "error")
+    except Exception as e:
+        flash(f"Error restoring stock for item '{item_name}': {str(e)}", "error")
 @app.route('/')
 def index():
     if 'logged_in' in session:
@@ -396,10 +416,42 @@ def delete_transaction(transaction_id):
     db = firestore.client()
 
     try:
+        # Retrieve the transaction being deleted
         transaction_ref = db.collection(u'purchases').document(transaction_id)
+        transaction = transaction_ref.get().to_dict()
+
+        if not transaction:
+            flash("Transaction not found.", "error")
+            return redirect(url_for('dashboard'))
+
+        # Retrieve the products in the transaction
+        products = transaction.get('products', [])
+
+        # For each product, restore the corresponding wheel and frame stock to the warehouse
+        for product in products:
+            product_id = product.get('id')
+            product_quantity = product.get('quantity')
+
+            # Fetch the product details to get the wheel and frame types
+            product_ref = db.collection(u'product').document(product_id).get()
+            product_data = product_ref.to_dict()
+
+            if product_data:
+                wheel_type = product_data.get('wheel')
+                frame_type = product_data.get('frame')
+
+                # Restore stock for the wheel (if applicable)
+                if wheel_type:
+                    restore_item_stock(db, wheel_type, product_quantity)
+
+                # Restore stock for the frame (if applicable)
+                if frame_type:
+                    restore_item_stock(db, frame_type, product_quantity)
+
+        # Delete the transaction after restoring the stock
         transaction_ref.delete()
-        
-        flash("Transaction deleted successfully!", "error")
+
+        flash("Transaction deleted successfully and warehouse stock updated!", "success")
     except Exception as e:
         flash(f"Error deleting transaction: {str(e)}", "error")
 
@@ -407,7 +459,6 @@ def delete_transaction(transaction_id):
 
 
 # API
-
 @app.route('/api/transaction9', methods=['GET'])
 def get_purchases():
     db = firestore.client()
