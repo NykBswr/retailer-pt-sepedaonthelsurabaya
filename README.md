@@ -86,8 +86,77 @@ Follow the steps below to run this project locally:
 
 ## Usage
 
-Once the installation is complete, open your browser and go to `http://localhost:8000` to use the dashboard. You can explore cashier the dashboard to view the visualized manufacturing data using  **ApexCharts** , which provides interactive and dynamic charts based on the integrated data.
+Once the installation is complete, open your browser and go to `http://127.0.0.1:5000/` to use the dashboard. You can explore cashier the dashboard to view the visualized manufacturing data using  **ApexCharts** , which provides interactive and dynamic charts based on the integrated data.
 
-### How to Integrate with Other Modules (Supplier & Distributor)
+## Available API Features and Endpoints
 
-1. Supplier
+1. **List Transaction:** View the contents of the existing store transaction list.
+
+   **Method:** Get
+   **Endpoint:** `api/transaction9`
+   **Response**:
+
+   ```json
+   {
+     "status": "success",
+     "transaction": [
+       {
+         "detailed_products": [
+           {
+             "name": "Madone",
+             "price": 1000000.0,
+             "quantity": 1,
+             "total_price": 1000000.0
+           },
+           {
+             "name": "Domane",
+             "price": 600000.0,
+             "quantity": 1,
+             "total_price": 600000.0
+           }
+         ],
+         "storeLoc": "bali",
+         "storeName": "Sepeda Onthel Skena",
+         "timestamp": "Mon, 30 Sep 2024 16:35:24 GMT",
+         "total_items": 2,
+         "total_transaction_price": 1600000.0,
+         "user": "nyk"
+       }
+     ]
+   }
+   ```
+2. **Add Transaction:** Adding (Checkout) product to list transaction which can later be seen in the get method.
+
+   **Method:** Post
+   **Endpoit:** `api/transaction9`
+
+   ****Request**:**
+
+   ```json
+   {
+       "user": "nyk",
+       "products": [
+           {
+               "id": "Madone",
+               "quantity": 2
+           },
+           {
+               "id": "Domane",
+               "quantity": 1
+           }
+       ]
+   }
+   ```
+
+   **Response**:
+
+   ```json
+   {
+     "message": "Purchase successfully processed and warehouse updated!",
+     "status": "success"
+   }
+   ```
+
+## How to Integrate with Other Modules (Supplier & Distributor)
+
+1. Supplier:
