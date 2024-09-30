@@ -55,26 +55,20 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="absolute mt-1 w-[40.5vw] rounded-md overflow-hidden z-10 hidden" id="wheelDropdown">
+                        <div class="absolute mt-1 w-[29.5vw] rounded-md overflow-hidden z-10 hidden" id="wheelDropdown">
                             <div class="bg-gradient-to-tl from-secondary to-primary p-1">
                                 <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1" id="wheelList">
-                                    <!-- Wheel List will be populated here -->
+                                    {% for wheel in wheel_list %}
+                                    <li class="cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1"
+                                        data-wheel="{{ wheel }}">
+                                        {{ wheel }}
+                                    </li>
+                                    {% endfor %}
                                 </ul>
                             </div>
                         </div>
-                        <input type="hidden" id="selectedwheelInput" name="wheel" value="">
+                        <input type="hidden" id="selectedwheel" name="wheel" value="">
                         <script>
-                            // List of wheels
-                            const wheels = [{
-                                    wheel: "Ban A"
-                                },
-                                {
-                                    wheel: "Ban B"
-                                }
-                            ];
-
-                            // Variables for managing state
-                            let selectedwheel = null;
                             let iswheelOpen = false;
 
                             const wheelSelector = document.getElementById('wheelSelector');
@@ -82,7 +76,7 @@
                             const wheelList = document.getElementById('wheelList');
                             const wheelArrow = document.getElementById('wheelArrow');
                             const selectedwheelText = document.getElementById('selectedwheelText');
-                            const selectedwheelInput = document.getElementById('selectedwheelInput'); // Hidden input
+                            const selectedwheelInput = document.getElementById('selectedwheel');
 
                             // Toggle dropdown visibility
                             wheelSelector.addEventListener('click', () => {
@@ -100,28 +94,23 @@
                                 }
                             });
 
-                            // Populate wheel list
-                            wheels.forEach((wheelObj) => {
-                                const wheelItem = document.createElement('li');
-                                wheelItem.textContent = wheelObj.wheel;
-                                wheelItem.className =
-                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                            // Add event listeners to dynamically populated wheel list
+                            document.querySelectorAll('[data-wheel]').forEach(wheelItem => {
                                 wheelItem.addEventListener('click', () => {
-                                    selectedwheel = wheelObj.id;
-                                    selectedwheelText.textContent = wheelObj.wheel;
+                                    selectedwheel = wheelItem.getAttribute('data-wheel');
+                                    selectedwheelText.textContent = selectedwheel;
 
                                     // Set value to hidden input
-                                    selectedwheelInput.value = wheelObj.wheel;
+                                    selectedwheelInput.value = selectedwheel;
 
+                                    // Close dropdown after selection
                                     iswheelOpen = false;
                                     wheelDropdown.classList.add('hidden');
                                     wheelDropdown.classList.remove('visible');
                                     wheelArrow.classList.remove('rotate-0');
                                     wheelArrow.classList.add('rotate-180');
                                 });
-                                wheelList.appendChild(wheelItem);
                             });
-                        </script>
                         </script>
                     </div>
                     <!-- Frame -->
@@ -142,26 +131,20 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="absolute mt-1 w-[40.5vw] rounded-md overflow-hidden z-10 hidden" id="frameDropdown">
+                        <div class="absolute mt-1 w-[29.5vw] rounded-md overflow-hidden z-10 hidden" id="frameDropdown">
                             <div class="bg-gradient-to-tl from-secondary to-primary p-1">
                                 <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1" id="frameList">
-                                    <!-- Frame List will be populated here -->
+                                    {% for frame in frame_list %}
+                                    <li class="cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1"
+                                        data-frame="{{ frame }}">
+                                        {{ frame }}
+                                    </li>
+                                    {% endfor %}
                                 </ul>
                             </div>
                         </div>
-                        <input type="hidden" id="selectedframeInput" name="frame" value="">
+                        <input type="hidden" id="selectedframe" name="frame" value="">
                         <script>
-                            // List of frames
-                            const frames = [{
-                                    frame: "Frame A"
-                                },
-                                {
-                                    frame: "Frame B"
-                                }
-                            ];
-
-                            // Variables for managing state
-                            let selectedframe = null;
                             let isframeOpen = false;
 
                             const frameSelector = document.getElementById('frameSelector');
@@ -169,7 +152,7 @@
                             const frameList = document.getElementById('frameList');
                             const frameArrow = document.getElementById('frameArrow');
                             const selectedframeText = document.getElementById('selectedframeText');
-                            const selectedframeInput = document.getElementById('selectedframeInput'); // Hidden input
+                            const selectedframeInput = document.getElementById('selectedframe');
 
                             // Toggle dropdown visibility
                             frameSelector.addEventListener('click', () => {
@@ -187,26 +170,22 @@
                                 }
                             });
 
-                            // Populate frame list
-                            frames.forEach((frameObj) => {
-                                const frameItem = document.createElement('li');
-                                frameItem.textContent = frameObj.frame;
-                                frameItem.className =
-                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                            // Add event listeners to dynamically populated frame list
+                            document.querySelectorAll('[data-frame]').forEach(frameItem => {
                                 frameItem.addEventListener('click', () => {
-                                    selectedframe = frameObj.id;
-                                    selectedframeText.textContent = frameObj.frame;
+                                    selectedframe = frameItem.getAttribute('data-frame');
+                                    selectedframeText.textContent = selectedframe;
 
                                     // Set value to hidden input
-                                    selectedframeInput.value = frameObj.frame;
+                                    selectedframeInput.value = selectedframe;
 
+                                    // Close dropdown after selection
                                     isframeOpen = false;
                                     frameDropdown.classList.add('hidden');
                                     frameDropdown.classList.remove('visible');
                                     frameArrow.classList.remove('rotate-0');
                                     frameArrow.classList.add('rotate-180');
                                 });
-                                frameList.appendChild(frameItem);
                             });
                         </script>
                     </div>
@@ -289,6 +268,12 @@
                                         Edit
                                     </h1>
                                 </th>
+                                <th class="w-[3.5vw]">
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-center ml-1 px-3 py-2">
+                                        Delete
+                                    </h1>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -324,7 +309,7 @@
                                 <td>
                                     <div class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary
                                     to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1 p-[2px]">
-                                        <button class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1
+                                        <button id="editProduct-{{ product['id'] }}" class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1
                                         py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
                                         hover:text-white ">
                                             <svg class="w-5 h-full" aria-hidden="true"
@@ -340,7 +325,360 @@
                                         </button>
                                     </div>
                                 </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1 p-[2px]">
+                                        <button id="delete-{{ product['id'] }}"
+                                            class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1 py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white ">
+                                            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                <path fill-rule="evenodd"
+                                                    d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
+
+                            <div id="delete-modal-{{ product['id'] }}"
+                                class="fixed hidden modal-container blur-background2 overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
+                                <div class="w-full h-full flex justify-center items-center relative">
+                                    <div class="box-gradient-border-third p-8 rounded-lg w-[80vw] max-w-lg">
+                                        <h2 class="text-xl font-bold mb-4">Delete Confirmation</h2>
+                                        <div class="mt-4 w-full flex flex-row justify-end">
+                                            <div class="text-base md:text-lg lg:text-xl py-2 px-4 mr-2 w-auto cursor-pointer font-semibold bg-gradient-to-tl from-secondary to-primary text-white rounded-md"
+                                                id="delete-cancel-{{ product['id'] }}">
+                                                Cancel
+                                            </div>
+                                            <form action="{{ url_for('deleteProduct', product_id=product['id']) }}"
+                                                method="POST" class="w-auto flex flex-col">
+                                                <div
+                                                    class="text-base md:text-lg lg:text-xl cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white font-semibold p-[2px]">
+                                                    <button type="submit" id="confirm-delete-{{ product['id'] }}"
+                                                        class="justify-center items-center w-full flex rounded-md border-0 bg-white px-4 py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white">
+                                                        <h1>Confirm</h1>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <script>
+                                // Show modal when clicking the delete button
+                                document.getElementById("delete-{{ product['id'] }}").addEventListener(
+                                    'click',
+                                    function (e) {
+                                        e.preventDefault(); // Prevent form submission
+                                        const modal = document.getElementById("delete-modal-{{ product['id'] }}");
+                                        modal.classList.remove('hidden');
+                                        modal.classList.add('flex');
+                                    });
+
+                                // Hide modal when clicking the cancel button
+                                document.getElementById("delete-cancel-{{ product['id'] }}").addEventListener('click',
+                                    function () {
+                                        const modal = document.getElementById("delete-modal-{{ product['id'] }}");
+                                        modal.classList.remove('flex');
+                                        modal.classList.add('hidden');
+                                    });
+                            </script>
+
+                            <div id="modal-{{ product['id'] }}"
+                                class="fixed hidden modal-container blur-background2 overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
+                                <div class="w-full h-full flex justify-center items-center relative">
+                                    <div class="box-gradient-border-third p-8 rounded-lg w-[80vw] max-w-lg">
+                                        <h2 class="text-xl font-bold mb-4">Edit Product</h2>
+                                        <form method="POST" enctype="multipart/form-data"
+                                            action="{{ url_for('editProduct', product_id=product['id']) }}">
+
+                                            <div class="w-full mb-4">
+                                                <label class="block text-primary mb-2" for="name-{{ product['id'] }}">
+                                                    Product Name
+                                                </label>
+                                                <div
+                                                    class="mb-2 w-full rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                                                    <input
+                                                        class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                                                        value="{{ product['name'] }}" type="text" name="name" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="w-full mb-4">
+                                                <label class="block text-primary mb-2" for="price-{{ product['id'] }}">
+                                                    Price
+                                                </label>
+                                                <div
+                                                    class="mb-2 w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                                                    <input
+                                                        class="flex w-full rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-dark outline-0 placeholder:text-primary md:text-sm lg:text-base"
+                                                        value="{{ product['price'] | currency }}" type="text"
+                                                        name="price" required>
+                                                </div>
+                                            </div>
+
+                                            <script>
+                                                const priceEdit = document.getElementById('price-input');
+
+                                                priceEdit.addEventListener('input', function (e) {
+                                                    let value = priceEdit.value;
+
+                                                    // Hapus karakter yang bukan angka
+                                                    value = value.replace(/[^0-9]/g, '');
+
+                                                    // Tambahkan tanda pemisah ribuan
+                                                    value = new Intl.NumberFormat('id-ID').format(value);
+                                                    value = value.replace(/\./g, ',');
+                                                    // Set nilai yang terformat ke input field dengan menambahkan 'Rp.' di depannya
+                                                    priceEdit.value = 'Rp. ' + value;
+                                                });
+                                            </script>
+
+
+                                            <div class="w-full mb-4">
+                                                <label class="block text-primary mb-2" for="image-{{ product['id'] }}">
+                                                    Upload Image
+                                                </label>
+                                                <div
+                                                    class="w-full cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary p-[2px]">
+                                                    <input
+                                                        class="block w-full rounded-md border-0 bg-white text-xs font-medium text-primary outline-0 placeholder:text-primary md:text-sm lg:text-base cursor-pointer"
+                                                        id="multiple_files" type="file" name="image">
+                                                </div>
+                                                <p class="mt-1 mb-2 text-sm text-gray-500 dark:text-gray-300"
+                                                    id="file_input_help">SVG, PNG, JPG or
+                                                    WEBP
+                                                    (MAX. 800x400px).</p>
+                                            </div>
+
+                                            <div class="w-full mb-4">
+                                                <label class="block text-primary mb-2" for="wheel-{{ product['id'] }}">
+                                                    Requirement
+                                                </label>
+                                                <!-- Wheel Selector -->
+                                                <div class="mb-3 w-full">
+                                                    <div class="w-full cursor-pointer bg-gradient-to-tl from-secondary to-primary rounded-md p-[2px]"
+                                                        id="wheelSelectorEdit">
+                                                        <div
+                                                            class="flex items-center justify-between bg-white rounded-md">
+                                                            <h1 class="px-3 py-2 text-primary font-medium text-xs md:text-sm lg:text-base"
+                                                                id="selectedwheelTextEdit">
+                                                                Select Wheels*
+                                                            </h1>
+                                                            <svg class="mr-2 h-[1vh] md:h-[2vh] w-auto text-primary transform transition-transform duration-300 rotate-180"
+                                                                id="wheelArrowEdit" xmlns="http://www.w3.org/2000/svg"
+                                                                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                    <div class="absolute mt-1 w-[29.5vw] rounded-md overflow-hidden z-10 hidden"
+                                                        id="wheelDropdownEdit">
+                                                        <div class="bg-gradient-to-tl from-secondary to-primary p-1">
+                                                            <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1"
+                                                                id="wheelListEdit">
+                                                                {% for wheel in wheel_list %}
+                                                                <li class="cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1"
+                                                                    data-wheel="{{ wheel }}">
+                                                                    {{ wheel }}
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" id="selectedwheelEdit" name="wheel"
+                                                        value="{{ product['wheel'] }}">
+                                                    <script>
+                                                        // Variables for managing state
+                                                        let selectedwheelEdit = "{{ product['wheel'] }}";
+                                                        let iswheelOpenEdit = false;
+
+                                                        const wheelSelectorEdit = document.getElementById(
+                                                            'wheelSelectorEdit');
+                                                        const wheelDropdownEdit = document.getElementById(
+                                                            'wheelDropdownEdit');
+                                                        const wheelListEdit = document.getElementById('wheelListEdit');
+                                                        const wheelArrowEdit = document.getElementById(
+                                                            'wheelArrowEdit');
+                                                        const selectedwheelTextEdit = document.getElementById(
+                                                            'selectedwheelTextEdit');
+                                                        const selectedwheelInputEdit = document.getElementById(
+                                                            'selectedwheelEdit'); // Hidden input
+
+                                                        // Toggle dropdown visibility
+                                                        wheelSelectorEdit.addEventListener('click', () => {
+                                                            iswheelOpenEdit = !iswheelOpenEdit;
+                                                            if (iswheelOpenEdit) {
+                                                                wheelDropdownEdit.classList.remove('hidden');
+                                                                wheelDropdownEdit.classList.add('visible');
+                                                                wheelArrowEdit.classList.remove('rotate-180');
+                                                                wheelArrowEdit.classList.add('rotate-0');
+                                                            } else {
+                                                                wheelDropdownEdit.classList.remove('visible');
+                                                                wheelDropdownEdit.classList.add('hidden');
+                                                                wheelArrowEdit.classList.remove('rotate-0');
+                                                                wheelArrowEdit.classList.add('rotate-180');
+                                                            }
+                                                        });
+
+                                                        // Add event listeners to dynamically populated wheel list
+                                                        document.querySelectorAll('[data-wheel]').forEach(
+                                                            wheelItemEdit => {
+                                                                wheelItemEdit.addEventListener('click', () => {
+                                                                    selectedwheelEdit = wheelItemEdit
+                                                                        .getAttribute('data-wheel');
+                                                                    selectedwheelTextEdit.textContent =
+                                                                        selectedwheelEdit;
+
+                                                                    // Set value to hidden input
+                                                                    selectedwheelInputEdit.value =
+                                                                        selectedwheelEdit;
+
+                                                                    // Close dropdown after selection
+                                                                    iswheelOpenEdit = false;
+                                                                    wheelDropdownEdit.classList.add(
+                                                                        'hidden');
+                                                                    wheelDropdownEdit.classList.remove(
+                                                                        'visible');
+                                                                    wheelArrowEdit.classList.remove(
+                                                                        'rotate-0');
+                                                                    wheelArrowEdit.classList.add(
+                                                                        'rotate-180');
+                                                                });
+                                                            });
+                                                    </script>
+                                                </div>
+                                                <!-- Frame Selector -->
+                                                <div class="mb-3 w-full">
+                                                    <div class="w-full cursor-pointer bg-gradient-to-tl from-secondary to-primary rounded-md p-[2px]"
+                                                        id="frameSelectorEdit">
+                                                        <div
+                                                            class="flex items-center justify-between bg-white rounded-md">
+                                                            <h1 class="px-3 py-2 text-primary font-medium text-xs md:text-sm lg:text-base"
+                                                                id="selectedframeTextEdit">
+                                                                Select Frames*
+                                                            </h1>
+                                                            <svg class="mr-2 h-[1vh] md:h-[2vh] w-auto text-primary transform transition-transform duration-300 rotate-180"
+                                                                id="frameArrowEdit" xmlns="http://www.w3.org/2000/svg"
+                                                                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                    <div class="absolute mt-1 w-[29.5vw] rounded-md overflow-hidden z-10 hidden"
+                                                        id="frameDropdownEdit">
+                                                        <div class="bg-gradient-to-tl from-secondary to-primary p-1">
+                                                            <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1"
+                                                                id="frameListEdit">
+                                                                {% for frame in frame_list %}
+                                                                <li class="cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1"
+                                                                    data-frame="{{ frame }}">
+                                                                    {{ frame }}
+                                                                </li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <input type="hidden" id="selectedframeEdit" name="frame"
+                                                        value="{{ product['frame'] }}">
+                                                    <script>
+                                                        // Variables for managing state
+                                                        let selectedframeEdit = "{{ product['frame'] }}";
+                                                        let isframeOpenEdit = false;
+
+                                                        const frameSelectorEdit = document.getElementById(
+                                                            'frameSelectorEdit');
+                                                        const frameDropdownEdit = document.getElementById(
+                                                            'frameDropdownEdit');
+                                                        const frameListEdit = document.getElementById('frameListEdit');
+                                                        const frameArrowEdit = document.getElementById(
+                                                            'frameArrowEdit');
+                                                        const selectedframeTextEdit = document.getElementById(
+                                                            'selectedframeTextEdit');
+                                                        const selectedframeInputEdit = document.getElementById(
+                                                            'selectedframeEdit'); // Hidden input
+
+                                                        // Toggle dropdown visibility
+                                                        frameSelectorEdit.addEventListener('click', () => {
+                                                            isframeOpenEdit = !isframeOpenEdit;
+                                                            if (isframeOpenEdit) {
+                                                                frameDropdownEdit.classList.remove('hidden');
+                                                                frameDropdownEdit.classList.add('visible');
+                                                                frameArrowEdit.classList.remove('rotate-180');
+                                                                frameArrowEdit.classList.add('rotate-0');
+                                                            } else {
+                                                                frameDropdownEdit.classList.remove('visible');
+                                                                frameDropdownEdit.classList.add('hidden');
+                                                                frameArrowEdit.classList.remove('rotate-0');
+                                                                frameArrowEdit.classList.add('rotate-180');
+                                                            }
+                                                        });
+
+                                                        // Add event listeners to dynamically populated frame list
+                                                        document.querySelectorAll('[data-frame]').forEach(
+                                                            frameItemEdit => {
+                                                                frameItemEdit.addEventListener('click', () => {
+                                                                    selectedframeEdit = frameItemEdit
+                                                                        .getAttribute('data-frame');
+                                                                    selectedframeTextEdit.textContent =
+                                                                        selectedframeEdit;
+
+                                                                    // Set value to hidden input
+                                                                    selectedframeInputEdit.value =
+                                                                        selectedframeEdit;
+
+                                                                    // Close dropdown after selection
+                                                                    isframeOpenEdit = false;
+                                                                    frameDropdownEdit.classList.add(
+                                                                        'hidden');
+                                                                    frameDropdownEdit.classList.remove(
+                                                                        'visible');
+                                                                    frameArrowEdit.classList.remove(
+                                                                        'rotate-0');
+                                                                    frameArrowEdit.classList.add(
+                                                                        'rotate-180');
+                                                                });
+                                                            });
+                                                    </script>
+                                                </div>
+
+                                            </div>
+                                            <div class="mt-4 w-full flex flex-row justify-end">
+                                                <div class="cursor-pointer text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-red-500"
+                                                    id="cancel-{{ product['id'] }}">
+                                                    Cancel
+                                                </div>
+                                                <button
+                                                    class="text-xl font-semibold ml-2 bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-primary"
+                                                    id="edit-{{ product['id'] }}">
+                                                    Edit
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                document.getElementById("editProduct-{{ product['id'] }}").addEventListener('click',
+                                    function () {
+                                        const modal = document.getElementById("modal-{{ product['id'] }}");
+                                        modal.classList.remove('hidden');
+                                        modal.classList.add('flex');
+                                    });
+
+                                document.getElementById("cancel-{{ product['id'] }}").addEventListener('click',
+                                    function () {
+                                        const modal = document.getElementById("modal-{{ product['id'] }}");
+                                        modal.classList.remove('flex');
+                                        modal.classList.add('hidden');
+                                    });
+                            </script>
                             {% endfor %}
                         </tbody>
                     </table>
@@ -350,4 +688,5 @@
         </div>
     </div>
 </section>
+
 {% endblock %}

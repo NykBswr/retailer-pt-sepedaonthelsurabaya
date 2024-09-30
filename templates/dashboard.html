@@ -10,7 +10,7 @@
     <div class="flex w-full h-full">
         <div class="flex mr-2 flex-col rounded-md p-8 w-1/2 h-[69vh] border-[5px] border-secondary">
             <h1
-                class="mb-2 bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[2vw] font-extrabold text-transparent">
+                class="mb-5 bg-gradient-to-tl from-secondary to-primary bg-clip-text text-start text-[2vw] font-extrabold text-transparent">
                 Transaction History
             </h1>
             <div class="max-w-full max-h-full overflow-auto">
@@ -200,7 +200,7 @@
                                         <div
                                             class="h-full flex rounded-md border-0 bg-white px-3 py-2 text-xs font-medium text-primary outline-0 md:text-sm lg:text-base">
                                             <h1 class="w-full h-full flex justify-start items-center">
-                                                {{ purchase['timestamp'].strftime('%H:%M:%S') }}
+                                                {{ purchase['timestamp'] | format_timestamp }}
                                             </h1>
                                         </div>
                                     </div>
@@ -227,13 +227,12 @@
                                 </div>
                             </td>
                             <td rowspan="{{ product_count }}">
-                                <form action="{{ url_for('delete_transaction', transaction_id=purchase['id']) }}"
-                                    method="POST"
+                                <div id="delete-container-{{ purchase['id'] }}"
                                     class="w-full h-full flex flex-col {% if product_count == 1 %} justify-center {% endif %}">
                                     <div
                                         class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1 p-[2px]">
                                         <button id="delete-transaction-{{ purchase['id'] }}"
-                                            class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1 py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white ">
+                                            class="justify-center items-center w-full flex rounded-md border-0 bg-white px-1 py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white">
                                             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                                 width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                                                 <path fill-rule="evenodd"
@@ -242,10 +241,54 @@
                                             </svg>
                                         </button>
                                     </div>
-                                </form>
+                                </div>
                             </td>
                             {% endif %}
                         </tr>
+                        <div id="delete-modal-{{ purchase['id'] }}"
+                            class="fixed hidden modal-container blur-background2 overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
+                            <div class="w-full h-full flex justify-center items-center relative">
+                                <div class="box-gradient-border-third p-8 rounded-lg w-[80vw] max-w-lg">
+                                    <h2 class="text-xl font-bold mb-4">Delete Confirmation</h2>
+                                    <div class="mt-4 w-full flex flex-row justify-end">
+                                        <div class="text-base md:text-lg lg:text-xl py-2 px-4 mr-2 w-auto cursor-pointer font-semibold bg-gradient-to-tl from-secondary to-primary text-white rounded-md"
+                                            id="delete-cancel-{{ purchase['id'] }}">
+                                            Cancel
+                                        </div>
+                                        <form
+                                            action="{{ url_for('delete_transaction', transaction_id=purchase['id']) }}"
+                                            method="POST" class="w-auto flex flex-col">
+                                            <div
+                                                class="text-base md:text-lg lg:text-xl cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white font-semibold p-[2px]">
+                                                <button type="submit" id="confirm-delete-{{ purchase['id'] }}"
+                                                    class="justify-center items-center w-full flex rounded-md border-0 bg-white px-4 py-2 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white">
+                                                    <h1>Confirm</h1>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            // Show modal when clicking the delete button
+                            document.getElementById("delete-transaction-{{ purchase['id'] }}").addEventListener('click',
+                                function (e) {
+                                    e.preventDefault(); // Prevent form submission
+                                    const modal = document.getElementById("delete-modal-{{ purchase['id'] }}");
+                                    modal.classList.remove('hidden');
+                                    modal.classList.add('flex');
+                                });
+
+                            // Hide modal when clicking the cancel button
+                            document.getElementById("delete-cancel-{{ purchase['id'] }}").addEventListener('click',
+                                function () {
+                                    const modal = document.getElementById("delete-modal-{{ purchase['id'] }}");
+                                    modal.classList.remove('flex');
+                                    modal.classList.add('hidden');
+                                });
+                        </script>
                         <div id="modal-{{ purchase['id'] }}"
                             class="fixed hidden modal-container blur-background2 overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
                             <div class="w-full h-full flex justify-center items-center relative">
@@ -256,7 +299,8 @@
                                         <div class="flex flex-col items-center justify-between mb-4">
                                             {% for product in purchase['detailed_products'] %}
                                             <div class="w-full">
-                                                <label class="block text-primary mb-2"
+                                                <label
+                                                    class="block font-semibold text-base md:text-lg lg:text-xl text-primary mb-2"
                                                     for="quantity-{{ product['name'] }}">
                                                     {{ product['name'] }}
                                                 </label>
@@ -271,14 +315,17 @@
                                             {% endfor %}
                                         </div>
                                         <div class="mt-4 w-full flex flex-row justify-end">
-                                            <div class="cursor-pointer text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-red-500"
+                                            <div class="px-4 py-2 mr-2 w-auto cursor-pointer text-base md:text-lg lg:text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white rounded-md"
                                                 id="cancel-{{ purchase['id'] }}">
                                                 Cancel
                                             </div>
                                             <button
-                                                class="text-xl font-semibold ml-2 bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-primary"
-                                                id="edit-{{ purchase['id'] }}">
-                                                Edit
+                                                class="text-base md:text-lg lg:text-xl cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-primary hover:text-white font-semibold p-[2px]">
+                                                <div type="submit" id="edit-{{ purchase['id'] }}" class="justify-center items-center w-full flex rounded-md border-0
+                                                    bg-white px-4 py-2 outline-0 hover:bg-gradient-to-tl from-secondary
+                                                    to-primary text-primary hover:text-white">
+                                                    Edit
+                                                </div>
                                             </button>
                                         </div>
                                     </form>
@@ -318,7 +365,7 @@
         justify-center items-center w-full md:inset-0 h-full">
         <div class="w-full h-full flex justify-center items-center relative">
             <div
-                class="{% if category == 'error' %} border-red-500 border-2 rounded-md sm:w-auto max-w-[80vw] sm:max-w-none {% else %} w-auto min-w-[60vw] max-w-[80vw] md:max-w-[65vw] {% endif %}">
+                class="{% if category == 'error' %} border-red-500 border-2 rounded-md sm:w-auto max-w-[80vw] sm:max-w-none {% else %} w-auto min-w-[35vw] max-w-[80vw] md:max-w-[40vw] {% endif %}">
                 <div
                     class="relative rounded-md shadow {% if category == 'error' %} w-full h-full bg-red-50 {% else %} flex flex-col justify-center box-gradient-border-third p-3 {% endif %}">
                     <div
@@ -333,8 +380,7 @@
                             {% endif %}
                         </h3>
                         <button class="close-modal rounded-md text-sm w-8 h-8 ms-auto inline-flex justify-center
-                            items-center {% if category == 'error' %}text-red-400 bg-transparent hover:bg-red-200
-                            hover:text-red-900 {% else %} boxes-svg2 text-dark hover:text-white{% endif %}">
+                            items-center  boxes-svg2 text-dark hover:text-white">
                             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
                                 viewBox="0 0 14 14">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"

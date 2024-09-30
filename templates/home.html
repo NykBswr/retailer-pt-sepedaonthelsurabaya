@@ -44,7 +44,7 @@
                                     <input type="text" name="quantity-{{ product['id'] }}" data-input-counter
                                         id="quantity-input-{{ product['id'] }}"
                                         class="bg-gray-50 border-x-0 h-auto text-center text-gray-900 text-sm focus:ring-secondary focus:border-secoring-secondary block w-[40%] py-2.5"
-                                        placeholder="0" required />
+                                        placeholder="0" required min="0" />
                                     <button type="button" id="increment-button{{ loop.index }}"
                                         data-input-counter-increment="quantity-input-{{ product['id'] }}"
                                         class="text-white hover:text-dark hover:bg-secondary bg-gradient-to-tl from-secondary to-primary rounded-e-lg p-4 h-full w-[30%] focus:outline-none">
@@ -289,7 +289,7 @@
         justify-center items-center w-full md:inset-0 h-full">
         <div class="w-full h-full flex justify-center items-center relative">
             <div
-                class="{% if category == 'error' %} border-red-500 border-2 rounded-md sm:w-auto max-w-[80vw] sm:max-w-none {% else %} w-auto min-w-[60vw] max-w-[80vw] md:max-w-[65vw] {% endif %}">
+                class="{% if category == 'error' %} border-red-500 border-2 rounded-md sm:w-auto max-w-[80vw] sm:max-w-none {% else %} w-auto min-w-[35vw] max-w-[80vw] md:max-w-[40vw] {% endif %}">
                 <div
                     class="relative rounded-md shadow {% if category == 'error' %} w-full h-full bg-red-50 {% else %} flex flex-col justify-center box-gradient-border-third p-3 {% endif %}">
                     <div
@@ -319,7 +319,7 @@
                             {% for category, message in messages %}
                             <div
                                 class="text-xl font-semibold mb-3 {% if category == 'success' %} text-green-600 {% elif category == 'error' %} text-red-600 {% endif %}">
-                                {{ message }}
+                                {{ message|safe }}
                             </div>
                             {% endfor %}
                         </div>

@@ -4,6 +4,8 @@
         <button id="sidebar-toggle" class="w-full flex items-center space-x-3 rtl:space-x-reverse" type="button">
             <img src="{{ url_for('static', filename='img/Button.svg') }}" class="h-5 w-auto" alt="Button" />
         </button>
+        {% else %}
+        <h1 class="text-white"></h1>
         {% endif %}
         <div class="hidden w-full md:block md:w-auto" id="navbar-default">
             <ul
@@ -19,7 +21,7 @@
                         </button>
                     </div>
                     {% else %}
-                    <a class="text-sm md:text-base lg:text-lg font-semibold text-white rounded-md bg-gradient-to-tl from-secondary to-primary px-3 py-2"
+                    <a class="text-base md:text-lg lg:text-xl font-semibold text-white rounded-md bg-gradient-to-tl from-secondary to-primary px-4 py-2"
                         href="{{ url_for('signin') }}">Sign In</a>
                     {% endif %}
                 </li>

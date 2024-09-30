@@ -1,4 +1,7 @@
 import os
+import pytz
+import requests
+from datetime import datetime
 from flask import jsonify
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,13 +12,7 @@ from firebase_admin import credentials, firestore
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-def format_currency(value):
-    return "Rp. {:,}".format(int(value))
-
-# Daftarkan filter ke Jinja
-app.jinja_env.filters['currency'] = format_currency
-
-# Konfigurasi Firebase
+# Firebase Configuration
 firebaseConfig = {
     'apiKey': "AIzaSyC6BuiB_At-GaFT3t4a5cuPzzFM0Jf9GfQ",
     'authDomain': "retailptsepedaonthelsurabaya.firebaseapp.com",
@@ -32,12 +29,33 @@ cred = credentials.Certificate('retail.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
-# Tentukan folder untuk menyimpan gambar
+# Image Upload Requirements
 UPLOAD_FOLDER = os.path.join('static', 'img')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-
-# Tambahkan folder upload di konfigurasi app
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Time Filter
+def get_local_timestamp():
+    tz = pytz.timezone('Asia/Jakarta')
+    return datetime.now(tz)
+def format_timestamp(timestamp, timezone_str='Asia/Jakarta'):
+    # Pastikan timestamp adalah tipe yang sesuai
+    if isinstance(timestamp, datetime):
+        # Konversi dari UTC ke zona waktu lokal
+        utc_zone = pytz.utc
+        local_zone = pytz.timezone(timezone_str)
+        utc_time = timestamp.replace(tzinfo=utc_zone)
+        local_time = utc_time.astimezone(local_zone)
+        return local_time.strftime('%H:%M:%S')
+    else:
+        return 'N/A'
+app.jinja_env.filters['format_timestamp'] = format_timestamp
+
+# Currency Filter
+def format_currency(value):
+    return "Rp. {:,}".format(int(value))
+app.jinja_env.filters['currency'] = format_currency
+
 # Fungsi untuk memeriksa ekstensi file yang diizinkan
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -79,6 +97,8 @@ def restore_item_stock(db, item_name, quantity):
             flash(f"Item '{item_name}' not found in warehouse.", "error")
     except Exception as e:
         flash(f"Error restoring stock for item '{item_name}': {str(e)}", "error")
+
+# Guest Area
 @app.route('/')
 def index():
     if 'logged_in' in session:
@@ -130,6 +150,70 @@ def signup():
         except Exception as e:
             flash('Error creating account: ' + str(e), 'error')
     return render_template('signup.html')
+@app.route('/signout', methods=['POST'])
+def signout():
+    session.pop('logged_in', None)
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+# Product
+@app.route('/product')
+def product():
+    if 'logged_in' not in session:
+        return redirect(url_for('signin'))
+
+    db = firestore.client()
+    products_ref = db.collection(u'product')
+    products = products_ref.stream()
+    items_ref = db.collection(u'items')
+    items = items_ref.stream()
+
+    item_stock = {}
+    wheel_list = []
+    frame_list = []
+
+    for item in items:
+        item_data = item.to_dict()
+        item_name = item_data.get('name')
+        supplier_name = item_data.get('supplier')
+
+        # Check if it's a wheel or frame and categorize based on supplier
+        if supplier_name == 'Supplier 1':
+            wheel_list.append(item_name)
+        elif supplier_name == 'Supplier 2':
+            frame_list.append(item_name)
+
+        # Keep track of stock levels
+        item_stock[item_name] = int(item_data['amount'])
+
+    product_list = []
+
+    for product in products:
+        product_data = product.to_dict()
+
+        product_data['id'] = product.id
+
+        # Get product requirements
+        wheel = product_data.get('wheel', None)
+        frame = product_data.get('frame', None)
+
+        # Check stock for each requirement from warehouse
+        wheel_stock = item_stock.get(wheel, 0)
+        frame_stock = item_stock.get(frame, 0)
+
+        # Calculate stock based on wheel and frame availability
+        product_stock = min(wheel_stock, frame_stock) if wheel and frame else 0
+
+        # Add stock data to product
+        product_data['stock'] = product_stock
+        product_list.append(product_data)
+
+    return render_template('product.html', 
+                        username=session.get('username'), 
+                        products=product_list,
+                        wheel_list=wheel_list,
+                        frame_list=frame_list)
+
 @app.route('/addProduct', methods=['POST'])
 def addProduct():
     name = request.form.get('name')
@@ -171,54 +255,69 @@ def addProduct():
     else:
         flash('Invalid image file. Please upload a valid image.', 'error')
         return redirect(url_for('product'))
-@app.route('/dashboard')
-def dashboard():
-    if 'logged_in' not in session:
-        return redirect(url_for('signin'))
+@app.route('/editProduct/<product_id>', methods=['POST'])
+def editProduct(product_id):
+    name = request.form.get('name')
+    price = request.form.get('price')
+    image = request.files.get('image')
+    wheel = request.form['wheel']
+    frame = request.form['frame']
 
-    db = firestore.client()
-    purchases_ref = db.collection(u'purchases')
-    purchases = purchases_ref.stream()
+    # Cek apakah field penting diisi
+    if not name or not price:
+        flash('Please fill out all required fields.', 'error')
+        return redirect(url_for('product'))
 
-    purchase_list = []
+    price_cleaned = price.replace('Rp', '').replace('.', '').replace(',', '').strip()
 
-    # Loop through each purchase in the 'purchases' collection
-    for purchase in purchases:
-        purchase_data = purchase.to_dict()
-        
-        purchase_data['id'] = purchase.id
+    try:
+        price_numeric = int(price_cleaned)
+    except ValueError:
+        flash('Invalid price format. Please enter a valid price.', 'error')
+        return redirect(url_for('product'))
 
-        # List to store detailed product information including prices
-        detailed_products = []
-        total_transaction_price = 0
+    # Jika ada gambar yang diunggah, simpan
+    if image and allowed_file(image.filename):
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    else:
+        filename = None
 
-        for product in purchase_data.get('products', []):
-            product_id = product.get('id')
-            product_quantity = product.get('quantity')
+    # Perbarui data produk di Firestore
+    try:
+        product_ref = db.collection(u'product').document(product_id)
+        update_data = {
+            u'name': name,
+            u'price': price_numeric,
+            u'wheel': wheel,
+            u'frame': frame
+        }
 
-            # Fetch product details from the 'product' collection based on the product ID
-            product_ref = db.collection(u'product').document(product_id).get()
-            product_details = product_ref.to_dict()
+        # Jika ada gambar baru, tambahkan ke data yang diperbarui
+        if filename:
+            update_data[u'image'] = filename
 
-            if product_details:
-                product_price = float(product_details.get('price', 0))
-                total_price = product_quantity * product_price
-                total_transaction_price += total_price
+        product_ref.update(update_data)
+        flash('Product updated successfully!', 'success')
+        return redirect(url_for('product'))
+    except Exception as e:
+        flash(f'Error updating product: {str(e)}', 'error')
+        return redirect(url_for('product'))
 
-                # Add the product details including price and total price to the detailed product list
-                detailed_products.append({
-                    'name': product_details.get('name'),
-                    'quantity': product_quantity,
-                    'price': product_price,
-                    'total_price': total_price
-                })
+@app.route('/deleteProduct/<product_id>', methods=['POST'])
+def deleteProduct(product_id):
+    try:
+        # Hapus produk dari Firestore
+        product_ref = db.collection(u'product').document(product_id)
+        product_ref.delete()
 
-        # Add the detailed products back to the purchase data
-        purchase_data['detailed_products'] = detailed_products
-        purchase_data['total_transaction_price'] = total_transaction_price
-        purchase_list.append(purchase_data)
-
-    return render_template('dashboard.html', username=session.get('username'), purchases=purchase_list)
+        flash('Product deleted successfully!', 'success')
+        return redirect(url_for('product'))
+    except Exception as e:
+        flash(f'Error deleting product: {str(e)}', 'error')
+        return redirect(url_for('product'))
+    
+# Cashier Area
 @app.route('/home')
 def home():
     if 'logged_in' not in session:
@@ -256,42 +355,6 @@ def home():
         product_data['stock'] = product_stock
         product_list.append(product_data)
     return render_template('home.html', username=session.get('username'), products=product_list)
-@app.route('/product')
-def product():
-    if 'logged_in' not in session:
-        return redirect(url_for('signin'))
-    db = firestore.client()
-    products_ref = db.collection(u'product')
-    products = products_ref.stream()
-    items_ref = db.collection(u'items')
-    items = items_ref.stream()
-
-    item_stock = {}
-    for item in items:
-        item_data = item.to_dict()
-        item_stock[item_data['name']] = int(item_data['amount'])
-
-    product_list = []
-    
-    for product in products:
-        product_data = product.to_dict()
-
-        # Ambil requirement produk
-        wheel = product_data.get('wheel', None)
-        frame = product_data.get('frame', None)
-
-        # Cek stok untuk setiap requirement dari warehouse
-        wheel_stock = item_stock.get(wheel, 0)
-        frame_stock = item_stock.get(frame, 0)
-
-        # Hitung stok minimal berdasarkan requirement (misal, ban dan frame harus ada)
-        product_stock = min(wheel_stock, frame_stock) if wheel and frame else 0
-
-        # Tambahkan data stok ke dalam data produk
-        product_data['stock'] = product_stock
-        product_list.append(product_data)
-
-    return render_template('product.html', username=session.get('username'), products=product_list)
 @app.route('/purchase_products', methods=['POST'])
 def purchase_products():
     selected_products = []
@@ -349,27 +412,56 @@ def purchase_products():
         flash("No products selected!", "error")
     
     return redirect(url_for('home'))
-@app.route('/warehouse')
-def warehouse():
+
+# Dashboard (CRUD and Visualization)
+@app.route('/dashboard')
+def dashboard():
     if 'logged_in' not in session:
         return redirect(url_for('signin'))
-    
+
     db = firestore.client()
-    items_ref = db.collection(u'items')
-    items = items_ref.stream()
+    purchases_ref = db.collection(u'purchases')
+    purchases = purchases_ref.stream()
 
-    item_list = []
-    
-    for item in items:
-        item_data = item.to_dict()
-        item_list.append(item_data)
+    purchase_list = []
 
-    return render_template('warehouse.html', username=session.get('username'), items=item_list)
-@app.route('/signout', methods=['POST'])
-def signout():
-    session.pop('logged_in', None)
-    session.pop('username', None)
-    return redirect(url_for('index'))
+    # Loop through each purchase in the 'purchases' collection
+    for purchase in purchases:
+        purchase_data = purchase.to_dict()
+        
+        purchase_data['id'] = purchase.id
+
+        # List to store detailed product information including prices
+        detailed_products = []
+        total_transaction_price = 0
+
+        for product in purchase_data.get('products', []):
+            product_id = product.get('id')
+            product_quantity = product.get('quantity')
+
+            # Fetch product details from the 'product' collection based on the product ID
+            product_ref = db.collection(u'product').document(product_id).get()
+            product_details = product_ref.to_dict()
+
+            if product_details:
+                product_price = float(product_details.get('price', 0))
+                total_price = product_quantity * product_price
+                total_transaction_price += total_price
+
+                # Add the product details including price and total price to the detailed product list
+                detailed_products.append({
+                    'name': product_details.get('name'),
+                    'quantity': product_quantity,
+                    'price': product_price,
+                    'total_price': total_price
+                })
+
+        # Add the detailed products back to the purchase data
+        purchase_data['detailed_products'] = detailed_products
+        purchase_data['total_transaction_price'] = total_transaction_price
+        purchase_list.append(purchase_data)
+
+    return render_template('dashboard.html', username=session.get('username'), purchases=purchase_list)
 @app.route('/edit_transaction/<transaction_id>', methods=['POST'])
 def edit_transaction(transaction_id):
     if 'logged_in' not in session:
@@ -379,7 +471,8 @@ def edit_transaction(transaction_id):
 
     # Fetch the original transaction data
     transaction_ref = db.collection(u'purchases').document(transaction_id)
-    transaction = transaction_ref.get().to_dict()
+    transaction_snapshot = transaction_ref.get()
+    transaction = transaction_snapshot.to_dict()
 
     if not transaction:
         flash("Transaction not found.", "error")
@@ -387,18 +480,81 @@ def edit_transaction(transaction_id):
 
     total_items = 0
     updated_products = []
+    stock_adjustments = {}  # Dictionary to hold required item adjustments
+    stock_update_errors = []
     for product in transaction.get('products', []):
+        product_id = product.get('id')
         product_name = product.get('name')
-        new_quantity = int(request.form.get(f'quantity-{product_name}', product['quantity']))
+        original_quantity = product['quantity']
+        new_quantity = int(request.form.get(f'quantity-{product_name}', original_quantity))
         total_items += new_quantity
         updated_products.append({
-            'id': product.get('id'),
+            'id': product_id,
             'name': product_name,
             'quantity': new_quantity,
         })
 
-    # Update transaction data in Firestore
+        delta_quantity = new_quantity - original_quantity
+
+        if delta_quantity != 0:
+            # Fetch product details to get the required items
+            product_ref = db.collection(u'product').document(product_id).get()
+            product_data = product_ref.to_dict()
+
+            if product_data:
+                wheel_type = product_data.get('wheel')
+                frame_type = product_data.get('frame')
+
+                # For each required item, accumulate the total adjustment
+                required_items = {}
+                if wheel_type:
+                    required_items[wheel_type] = required_items.get(wheel_type, 0) + delta_quantity
+                if frame_type:
+                    required_items[frame_type] = required_items.get(frame_type, 0) + delta_quantity
+
+                # Update the stock_adjustments dictionary
+                for item_name, adjustment in required_items.items():
+                    stock_adjustments[item_name] = stock_adjustments.get(item_name, 0) + adjustment
+            else:
+                stock_update_errors.append(f"Product data not found for '{product_name}'.")
+    # Check if there are any errors
+    if stock_update_errors:
+        flash("Some errors occurred while preparing to update stock:\n" + "\n".join(stock_update_errors), "error")
+        return redirect(url_for('dashboard'))
+
+    # Now, check if there is sufficient stock for all items
+    items_ref = db.collection(u'items')
+    insufficient_stock = False
+    stock_check_errors = []
+    for item_name, total_adjustment in stock_adjustments.items():
+        if total_adjustment > 0:
+            # Need to decrease stock by total_adjustment
+            item_query = items_ref.where(u'name', u'==', item_name).get()
+            if item_query:
+                item_doc = item_query[0]
+                item_data = item_doc.to_dict()
+                current_stock = int(item_data.get('amount', 0))
+                if current_stock < total_adjustment:
+                    insufficient_stock = True
+                    stock_check_errors.append(f"Not enough stock for item '{item_name}'. Required: {total_adjustment}, Available: {current_stock}")
+            else:
+                insufficient_stock = True
+                stock_check_errors.append(f"Item '{item_name}' not found in warehouse.")
+    if insufficient_stock:
+        error_message = "Cannot update transaction due to insufficient stock:\n" + "\n".join(stock_check_errors)
+        flash(error_message, "error")
+        return redirect(url_for('dashboard'))
+
+    # If sufficient stock, proceed to update the warehouse stock
     try:
+        for item_name, total_adjustment in stock_adjustments.items():
+            if total_adjustment > 0:
+                # Need to decrease stock
+                decrement_item_stock(db, item_name, total_adjustment)
+            elif total_adjustment < 0:
+                # Need to increase stock
+                restore_item_stock(db, item_name, abs(total_adjustment))
+        # Update transaction data in Firestore
         transaction_ref.update({
             'products': updated_products,
             'total_items': total_items
@@ -406,6 +562,7 @@ def edit_transaction(transaction_id):
         flash("Transaction updated successfully!", "success")
     except Exception as e:
         flash(f"Error updating transaction: {str(e)}", "error")
+        return redirect(url_for('dashboard'))
 
     return redirect(url_for('dashboard'))
 @app.route('/delete_transaction/<transaction_id>', methods=['POST'])
@@ -456,11 +613,172 @@ def delete_transaction(transaction_id):
         flash(f"Error deleting transaction: {str(e)}", "error")
 
     return redirect(url_for('dashboard'))
-
+# Warehouse
+@app.route('/warehouse')
+def warehouse():
+    if 'logged_in' not in session:
+        return redirect(url_for('signin'))
+    
+    # Inisialisasi Firestore
+    db = firestore.client()
+    items_ref = db.collection(u'items')
+    
+    # Mendefinisikan informasi untuk kedua supplier
+    suppliers = [
+        {
+            'name': 'Supplier 1',
+            'url': 'http://167.99.238.114:8000/products',
+            'key_name': 'nama_produk',
+            'key_price': 'harga',
+            'key_id': 'id_produk'
+        },
+        {
+            'name': 'Supplier 2',
+            'url': 'https://suplierman.pythonanywhere.com/products/api/products',
+            'key_name': 'nama_produk',
+            'key_price': 'harga',
+            'key_id': 'id_produk'
+        }
+        # {
+        #     'name': 'Supplier 3',
+        #     'url': 'https://suplierman.pythonanywhere.com/products/api/products',
+        #     'key_name': 'nama_produk',
+        #     'key_price': 'harga',
+        #     'key_id': 'id_produk'
+        # }
+    ]
+    
+    # Fungsi untuk memproses setiap supplier
+    def process_supplier(supplier):
+        supplier_name = supplier['name']
+        url = supplier['url']
+        key_name = supplier['key_name']
+        key_price = supplier['key_price']
+        key_id = supplier['key_id']
+        
+        response = requests.get(url)
+        if response.status_code == 200:
+            items_api = response.json()
+            print(f"Successfully retrieved products from {supplier_name}.")
+        else:
+            print(f"Failed to retrieve products from {supplier_name}. Status code: {response.status_code}", "error")
+            return []
+        
+        # Mengambil daftar produk dari Firestore untuk supplier ini
+        items_db = [item.to_dict() for item in items_ref.where('supplier', '==', supplier_name).stream()]
+        
+        # Buat set supplier_id dari API untuk memudahkan pencarian
+        supplier_ids_api = set()
+        new_items = []
+        
+        for item_api in items_api:
+            product_name = item_api.get(key_name)
+            product_price = item_api.get(key_price)
+            supplier_id = item_api.get(key_id)
+            
+            if not product_name or not supplier_id:
+                print(f"Produk tanpa nama atau ID ditemukan di {supplier_name}: {item_api}")
+                continue  # Lewati produk tanpa nama atau ID
+            
+            # Menambahkan supplier_id ke set
+            supplier_ids_api.add(supplier_id)
+            
+            # Cek apakah produk sudah ada di Firestore berdasarkan nama dan supplier_id
+            exists = any(
+                item['name'] == product_name and item.get('supplier_id') == supplier_id 
+                for item in items_db
+            )
+            
+            if not exists:
+                # Menangani format harga
+                try:
+                    if isinstance(product_price, str):
+                        # Jika harga berakhiran '.00', hapus bagian desimalnya
+                        if product_price.endswith('.00'):
+                            product_price = product_price[:-3]
+                        # Konversi ke integer
+                        product_price_int = int(product_price)
+                    elif isinstance(product_price, float):
+                        # Konversi float ke integer
+                        product_price_int = int(product_price)
+                    elif isinstance(product_price, int):
+                        # Harga sudah integer
+                        product_price_int = product_price
+                    else:
+                        # Format tidak dikenali, tetapkan ke 0 atau nilai default
+                        product_price_int = 0
+                        print(f"Unrecognized price format for product '{product_name}' from {supplier_name}: {product_price}")
+                except (ValueError, TypeError) as e:
+                    # Tangani kesalahan konversi
+                    product_price_int = 0
+                    print(f"Error processing price for product '{product_name}' from {supplier_name}: {str(e)}")
+                
+                new_item = {
+                    'name': product_name,
+                    'amount': 0,
+                    'price': product_price_int,
+                    'supplier': supplier_name,
+                    'supplier_id': supplier_id
+                }
+                try:
+                    items_ref.add(new_item)
+                    new_items.append(new_item)
+                    print(f"Added new product from {supplier_name}: {product_name}")
+                except Exception as e:
+                    flash(f"Error adding product '{product_name}' from {supplier_name}: {str(e)}", "error")
+        
+        # Mengidentifikasi produk yang ada di Firestore tetapi tidak ada di API
+        supplier_ids_db = set(item['supplier_id'] for item in items_db)
+        ids_to_delete = supplier_ids_db - supplier_ids_api
+        
+        # Hapus produk yang tidak ada di API
+        for item in items_db:
+            if item['supplier_id'] in ids_to_delete:
+                try:
+                    # Cari dokumen berdasarkan ID Firestore
+                    doc_ref = items_ref.where('supplier_id', '==', item['supplier_id']).where('supplier', '==', supplier_name).stream()
+                    for doc in doc_ref:
+                        doc.reference.delete()
+                        print(f"Deleted product from {supplier_name}: {item['name']} (ID: {item['supplier_id']})")
+                except Exception as e:
+                    flash(f"Error deleting product '{item['name']}' from {supplier_name}: {str(e)}", "error")
+        
+        return new_items
+    
+    # Memproses kedua supplier dan menyimpan daftar produk baru masing-masing
+    new_items_supplier1 = process_supplier(suppliers[0])
+    new_items_supplier2 = process_supplier(suppliers[1])
+    # new_items_supplier3 = process_supplier(suppliers[2])
+    
+    # Fetch the updated list of items from Firestore
+    updated_items = [item.to_dict() for item in items_ref.stream()]
+    
+    # Memisahkan daftar item berdasarkan supplier
+    items_supplier1 = [item for item in updated_items if item.get('supplier') == 'Supplier 1']
+    items_supplier2 = [item for item in updated_items if item.get('supplier') == 'Supplier 2']
+    # items_supplier3 = [item for item in updated_items if item.get('supplier') == 'Supplier 3']
+    
+    # Render the warehouse page dengan daftar item yang diperbarui
+    return render_template(
+        'warehouse.html',
+        username=session.get('username'),
+        supplier1_new_items=new_items_supplier1,
+        supplier2_new_items=new_items_supplier2,
+        # supplier3_new_items=new_items_supplier3,
+        items_supplier1=items_supplier1,
+        items_supplier2=items_supplier2,
+        # items_supplier3=items_supplier3
+    )
+@app.route('/warehouse/addItems/', methods=['POST'])
+def addItems():
+    if 'logged_in' not in session:
+        return redirect(url_for('signin'))
+    return redirect(url_for('warehouse'))
 
 # API
 @app.route('/api/transaction9', methods=['GET'])
 def get_purchases():
+    
     db = firestore.client()
     purchases_ref = db.collection(u'purchases')
     purchases = purchases_ref.stream()
