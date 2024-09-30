@@ -949,7 +949,14 @@ def addItems(supplier_name):
     # return jsonify(payload)
 
     try:
-        check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+
+        if supplier_id == "SUP01":
+            check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        # elif supplier_id == "SUP02":
+        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        # else:
+        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        
         check_price_data = check_price_response.json()
 
         # Tampilkan hasil jika berhasil
@@ -1013,7 +1020,13 @@ def confirm_purchase():
 
     try:
         # Send POST request to external API
-        response = requests.post('http://167.99.238.114:8000/place_order', json=payload)
+        if supplier_name == "SUP01":
+            response = requests.post('http://167.99.238.114:8000/place_order', json=payload)
+        # elif supplier_name == "SUP02":
+        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        # else:
+        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        
         if response.status_code == 200:
             result = response.json()
 
