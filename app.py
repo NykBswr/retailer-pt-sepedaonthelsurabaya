@@ -303,7 +303,6 @@ def editProduct(product_id):
     except Exception as e:
         flash(f'Error updating product: {str(e)}', 'error')
         return redirect(url_for('product'))
-
 @app.route('/deleteProduct/<product_id>', methods=['POST'])
 def deleteProduct(product_id):
     try:
@@ -613,6 +612,7 @@ def delete_transaction(transaction_id):
         flash(f"Error deleting transaction: {str(e)}", "error")
 
     return redirect(url_for('dashboard'))
+
 # Warehouse
 @app.route('/warehouse')
 def warehouse():
@@ -630,21 +630,27 @@ def warehouse():
             'url': 'http://167.99.238.114:8000/products',
             'key_name': 'nama_produk',
             'key_price': 'harga',
-            'key_id': 'id_produk'
+            'key_id': 'id_produk',
+            'key_stock': 'stock',
+            'weight': 'berat'
         },
         {
             'name': 'Supplier 2',
             'url': 'https://suplierman.pythonanywhere.com/products/api/products',
             'key_name': 'nama_produk',
             'key_price': 'harga',
-            'key_id': 'id_produk'
+            'key_id': 'id_produk',
+            'key_stock': 'stock',
+            'weight': 'berat'
         }
         # {
         #     'name': 'Supplier 3',
         #     'url': 'https://suplierman.pythonanywhere.com/products/api/products',
         #     'key_name': 'nama_produk',
         #     'key_price': 'harga',
-        #     'key_id': 'id_produk'
+        #     'key_id': 'id_produk',
+        #     'key_stock': 'stock',
+        #     'weight': 'berat'
         # }
     ]
     
@@ -655,14 +661,20 @@ def warehouse():
         key_name = supplier['key_name']
         key_price = supplier['key_price']
         key_id = supplier['key_id']
+        key_stock = supplier['key_stock']
+        # weight = supplier['weight']
         
         response = requests.get(url)
         if response.status_code == 200:
-            items_api = response.json()
-            print(f"Successfully retrieved products from {supplier_name}.")
+            try:
+                items_api = response.json()
+                print(f"Successfully retrieved products from {supplier_name}.")
+            except ValueError:
+                flash(f"Invalid JSON response from {supplier_name}.", "error")
+                return [], []
         else:
-            print(f"Failed to retrieve products from {supplier_name}. Status code: {response.status_code}", "error")
-            return []
+            flash(f"Failed to retrieve products from {supplier_name}. Status code: {response.status_code}", "error")
+            return [], []
         
         # Mengambil daftar produk dari Firestore untuk supplier ini
         items_db = [item.to_dict() for item in items_ref.where('supplier', '==', supplier_name).stream()]
@@ -670,11 +682,14 @@ def warehouse():
         # Buat set supplier_id dari API untuk memudahkan pencarian
         supplier_ids_api = set()
         new_items = []
+        list_stock = []
         
         for item_api in items_api:
             product_name = item_api.get(key_name)
             product_price = item_api.get(key_price)
             supplier_id = item_api.get(key_id)
+            # weight = item_api.get(weight, 0)
+            stock = item_api.get(key_stock, 0)
             
             if not product_name or not supplier_id:
                 print(f"Produk tanpa nama atau ID ditemukan di {supplier_name}: {item_api}")
@@ -720,12 +735,37 @@ def warehouse():
                     'supplier': supplier_name,
                     'supplier_id': supplier_id
                 }
+
                 try:
                     items_ref.add(new_item)
                     new_items.append(new_item)
                     print(f"Added new product from {supplier_name}: {product_name}")
                 except Exception as e:
                     flash(f"Error adding product '{product_name}' from {supplier_name}: {str(e)}", "error")
+            
+            if isinstance(product_price, str):
+                # Jika harga berakhiran '.00', hapus bagian desimalnya
+                if product_price.endswith('.00'):
+                    product_price = product_price[:-3]
+                # Konversi ke integer
+                product_price_int = int(product_price)
+            elif isinstance(product_price, float):
+                # Konversi float ke integer
+                product_price_int = int(product_price)
+            elif isinstance(product_price, int):
+                # Harga sudah integer
+                product_price_int = product_price
+            else:
+                # Format tidak dikenali, tetapkan ke 0 atau nilai default
+                product_price_int = 0
+                print(f"Unrecognized price format for product '{product_name}' from {supplier_name}: {product_price}")
+            list_stock.append({
+                'name': product_name,
+                'stock': stock,
+                'price': product_price_int,
+                'supplier': supplier_name,
+                # 'weight': weight,
+            })
         
         # Mengidentifikasi produk yang ada di Firestore tetapi tidak ada di API
         supplier_ids_db = set(item['supplier_id'] for item in items_db)
@@ -735,19 +775,20 @@ def warehouse():
         for item in items_db:
             if item['supplier_id'] in ids_to_delete:
                 try:
-                    # Cari dokumen berdasarkan ID Firestore
+                    # Cari dokumen berdasarkan supplier_id dan supplier name
                     doc_ref = items_ref.where('supplier_id', '==', item['supplier_id']).where('supplier', '==', supplier_name).stream()
                     for doc in doc_ref:
                         doc.reference.delete()
                         print(f"Deleted product from {supplier_name}: {item['name']} (ID: {item['supplier_id']})")
+                        flash(f"Deleted product '{item['name']}' from {supplier_name} as it no longer exists in the API.", "info")
                 except Exception as e:
                     flash(f"Error deleting product '{item['name']}' from {supplier_name}: {str(e)}", "error")
         
-        return new_items
-    
+        return new_items, list_stock
+
     # Memproses kedua supplier dan menyimpan daftar produk baru masing-masing
-    new_items_supplier1 = process_supplier(suppliers[0])
-    new_items_supplier2 = process_supplier(suppliers[1])
+    new_items_supplier1, list_stock1 = process_supplier(suppliers[0])
+    new_items_supplier2, list_stock2 = process_supplier(suppliers[1])
     # new_items_supplier3 = process_supplier(suppliers[2])
     
     # Fetch the updated list of items from Firestore
@@ -757,7 +798,12 @@ def warehouse():
     items_supplier1 = [item for item in updated_items if item.get('supplier') == 'Supplier 1']
     items_supplier2 = [item for item in updated_items if item.get('supplier') == 'Supplier 2']
     # items_supplier3 = [item for item in updated_items if item.get('supplier') == 'Supplier 3']
-    
+
+    suppliers = [
+        {'id': 'Supplier1', 'name': 'Supplier 1'},
+        {'id': 'Supplier2', 'name': 'Supplier 2'},
+        {'id': 'Supplier3', 'name': 'Supplier 3'},
+    ]
     # Render the warehouse page dengan daftar item yang diperbarui
     return render_template(
         'warehouse.html',
@@ -767,7 +813,11 @@ def warehouse():
         # supplier3_new_items=new_items_supplier3,
         items_supplier1=items_supplier1,
         items_supplier2=items_supplier2,
-        # items_supplier3=items_supplier3
+        # items_supplier3=items_supplier3,
+        suppliers=suppliers,
+        list_stock1=list_stock1,
+        list_stock2=list_stock2,
+        # list_stock3=list_stock3
     )
 @app.route('/warehouse/addItems/', methods=['POST'])
 def addItems():
@@ -872,5 +922,6 @@ def post_products():
     
     except Exception as e:
         return jsonify({"message": f"Error processing purchase: {str(e)}", "status": "error"}), 500
+
 if __name__ == "__main__":
     app.run(debug=True)

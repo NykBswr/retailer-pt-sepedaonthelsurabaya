@@ -1,0 +1,250 @@
+{% for supplier in suppliers %}
+<div id="modal-{{ supplier.id }}"
+    class="hidden fixed modal-container blur-background2 overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
+    <div class="w-full h-full flex justify-center items-center relative">
+        <div class="box-gradient-border-third p-8 rounded-lg w-[80vw]">
+            <h2 class="text-xl font-bold mb-4">Buy Item from {{ supplier.name }}</h2>
+            <form method="POST" enctype="multipart/form-data"
+                action="{{ url_for('addItems', supplier_name=supplier.name) }}">
+                <div class="w-full overflow-y-auto h-[50vh] pr-2">
+                    <table class="w-full table-auto">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mr-1 px-3 py-2 text-start">
+                                        Name
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                        Price
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                        Stock
+                                    </h1>
+                                </th>
+                                <th>
+                                    <h1
+                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-center">
+                                        Amount
+                                    </h1>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set stock_list = [] %}
+                            {% if supplier.name == 'Supplier 1' %}
+                            {% set stock_list = list_stock1 %}
+                            {% elif supplier.name == 'Supplier 2' %}
+                            {% set stock_list = list_stock2 %}
+                            {% elif supplier.name == 'Supplier 3' %}
+                            {% set stock_list = list_stock3 %}
+                            {% endif %}
+                            {% for item in stock_list %}
+                            <tr>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mr-1 my-1 p-[2px]">
+                                        <h1 class="flex rounded-md border-0 bg-white px-1 py-2 text-xs
+                                            text-primary  outline-0 md:text-sm lg:text-base">
+                                            {{ item.name }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <h1
+                                            class="flex rounded-md border-0 bg-white px-1 py-2 text-xs outline-0 text-primary md:text-sm lg:text-base">
+                                            {{ item.price | currency }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <h1
+                                            class="flex rounded-md border-0 bg-white px-1 py-2 text-xs outline-0 text-primary md:text-sm lg:text-base">
+                                            {{ item.stock }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td class="w-[5vw]">
+                                    <div class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary
+                                        to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <div id="counter-{{ supplier.id }}"
+                                            class="transition duration-500 group-hover:flex h-full w-auto justify-center items-center">
+                                            <div
+                                                class="h-full w-full flex justify-center items-center text-white font-semibold bg-transparent">
+                                                <div class="flex w-full h-full justify-center items-center">
+                                                    <button type="button" id="decrement-button-{{ supplier.id }}"
+                                                        data-input-counter-decrement="quantity-input-{{ item['name'] }}"
+                                                        class="bg-white rounded-md mr-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
+                                                        <svg class="text-primary w-2 h-2" aria-hidden="true"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 18 2">
+                                                            <path stroke="currentColor" stroke-linecap="round"
+                                                                stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                                                        </svg>
+                                                    </button>
+                                                    <input type="text" name="quantity-{{ item['name'] }}"
+                                                        data-input-counter id="quantity-input-{{ item['name'] }}"
+                                                        class="rounded-md bg-gray-50 border-x-0 h-auto text-center text-gray-900 text-sm focus:ring-secondary focus:border-secoring-secondary block w-[40%]"
+                                                        placeholder="0" required />
+                                                    <button type="button" id="increment-button{{ supplier.id }}"
+                                                        data-input-counter-increment="quantity-input-{{ item['name'] }}"
+                                                        class="bg-white rounded-md ml-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
+                                                        <svg class="text-primary w-2 h-2" aria-hidden="true"
+                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 18 18">
+                                                            <path stroke="currentColor" stroke-linecap="round"
+                                                                stroke-linejoin="round" stroke-width="2"
+                                                                d="M9 1v16M1 9h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="w-full mt-4 flex items-center">
+                    <div class="w-1/2 flex justify-start">
+                        <div class="w-full cursor-pointer bg-gradient-to-tl from-secondary to-primary rounded-md p-[2px]"
+                            id="distSelector-{{ supplier.id }}">
+                            <div class="flex items-center justify-between bg-white rounded-md">
+                                <h1 class="px-3 py-2 text-primary font-medium text-xs md:text-sm lg:text-base"
+                                    id="selecteddistText-{{ supplier.id }}">
+                                    Select Distributor*
+                                </h1>
+                                <svg class="mr-2 h-[2vh] md:h-[3vh] w-auto text-primary transform transition-transform duration-300 rotate-180"
+                                    id="distArrow-{{ supplier.id }}" xmlns="http://www.w3.org/2000/svg" width="24"
+                                    height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="absolute mt-10 w-[28vw] rounded-md overflow-hidden z-10 hidden"
+                            id="distDropdown-{{ supplier.id }}">
+                            <div class="bg-gradient-to-tl from-secondary to-primary p-1">
+                                <ul class="rounded-md shadow-lg max-h-[30vh] overflow-y-auto px-1"
+                                    id="distList-{{ supplier.id }}">
+                                    <!-- dist List will be populated here -->
+                                </ul>
+                            </div>
+                        </div>
+                        <input type="hidden" id="selecteddistInput-{{ supplier.id }}" name="dist" value="">
+
+                        <script>
+                            // List of distributors
+                            const dists = [{
+                                    id: "DIS01",
+                                    distributor: "Distributor 1"
+                                },
+                                {
+                                    id: "DIS02",
+                                    distributor: "Distributor 2"
+                                },
+                                {
+                                    id: "DIS03",
+                                    distributor: "Distributor 3"
+                                }
+                            ];
+
+                            // Variables for managing state
+                            let selecteddist = null;
+                            let isdistOpen = false;
+
+                            const distSelector = document.getElementById('distSelector-{{ supplier.id }}');
+                            const distDropdown = document.getElementById('distDropdown-{{ supplier.id }}');
+                            const distList = document.getElementById('distList-{{ supplier.id }}');
+                            const distArrow = document.getElementById('distArrow-{{ supplier.id }}');
+                            const selecteddistText = document.getElementById('selecteddistText-{{ supplier.id }}');
+                            const selecteddistInput = document.getElementById(
+                                'selecteddistInput-{{ supplier.id }}'); // Hidden input
+
+                            // Toggle dropdown visibility
+                            distSelector.addEventListener('click', () => {
+                                isdistOpen = !isdistOpen;
+                                if (isdistOpen) {
+                                    distDropdown.classList.remove('hidden');
+                                    distDropdown.classList.add('visible');
+                                    distArrow.classList.remove('rotate-180');
+                                    distArrow.classList.add('rotate-0');
+                                } else {
+                                    distDropdown.classList.remove('visible');
+                                    distDropdown.classList.add('hidden');
+                                    distArrow.classList.remove('rotate-0');
+                                    distArrow.classList.add('rotate-180');
+                                }
+                            });
+
+                            // Populate dist list
+                            dists.forEach((distObj) => {
+                                const distItem = document.createElement('li');
+                                distItem.textContent = distObj
+                                    .distributor; // Use 'distributor' instead of 'dist'
+                                distItem.className =
+                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                                distItem.addEventListener('click', () => {
+                                    selecteddist = distObj.id;
+                                    selecteddistText.textContent = distObj
+                                        .distributor; // Use 'distributor' instead of 'dist'
+
+                                    // Set value to hidden input
+                                    selecteddistInput.value = distObj
+                                        .distributor; // Use 'distributor' instead of 'dist'
+
+                                    isdistOpen = false;
+                                    distDropdown.classList.add('hidden');
+                                    distDropdown.classList.remove('visible');
+                                    distArrow.classList.remove('rotate-0');
+                                    distArrow.classList.add('rotate-180');
+                                });
+                                distList.appendChild(distItem);
+                            });
+                        </script>
+                    </div>
+                    <div class="w-1/2 flex justify-end">
+                        <div class="cursor-pointer text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-red-500"
+                            id="cancel-{{ supplier.id }}">
+                            Cancel
+                        </div>
+                        <button
+                            class="text-xl font-semibold ml-2 bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-primary"
+                            id="buy-{{ supplier.id }}">
+                            Buy
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById("buyItems-{{ supplier.id }}").addEventListener('click',
+        function () {
+            const modal = document.getElementById("modal-{{ supplier.id }}");
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        });
+
+    document.getElementById("cancel-{{ supplier.id }}").addEventListener('click',
+        function () {
+            const modal = document.getElementById("modal-{{ supplier.id }}");
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        });
+</script>
+{% endfor %}

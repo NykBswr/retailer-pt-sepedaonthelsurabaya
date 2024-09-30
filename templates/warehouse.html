@@ -24,12 +24,6 @@
                                         Name
                                     </h1>
                                 </th>
-                                <!-- <th>
-                                <h1
-                                    class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
-                                    Description
-                                </h1>
-                            </th> -->
                                 <th>
                                     <h1
                                         class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
@@ -42,16 +36,10 @@
                                         Amount
                                     </h1>
                                 </th>
-                                <th>
-                                    <h1
-                                        class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg text-center ml-1 px-3 py-2">
-                                        Order
-                                    </h1>
-                                </th>
                             </tr>
                             <tr>
                             <tr>
-                                <td colspan="4">
+                                <td colspan="2">
                                     <div id="wheelDropdown"
                                         class="mt-1 items-center rounded-md flex justify-between bg-gradient-to-tl from-secondary to-primary cursor-pointer">
                                         <h1
@@ -67,7 +55,21 @@
                                         </svg>
                                     </div>
                                 </td>
-                            </tr>
+                                <td class="w-[5.8vw] h-full">
+                                    <div class="w-[5.8vw] flex cursor-pointer rounded-md bg-gradient-to-tl from-secondary
+                                        to-primary text-primary hover:text-white text-lg font-semibold ml-1 mt-2
+                                        p-[2px]" id="buyItems-Supplier1">
+                                        <button class="w-full justify-center items-center flex rounded-md border-0 bg-white px-1
+                                        py-[0.85rem] outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
+                                        hover:text-white">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         </thead>
                         <!-- Wheel -->
@@ -101,21 +103,6 @@
                                         </h1>
                                     </div>
                                 </td>
-                                <td class="w-[5vw] h-full">
-                                    <div class="w-[5vw] flex cursor-pointer rounded-md bg-gradient-to-tl from-secondary
-                                        to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1
-                                        p-[2px]">
-                                        <button class="w-full justify-center items-center flex rounded-md border-0 bg-white px-1
-                                        py-3 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
-                                        hover:text-white ">
-                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                                fill="none" viewBox="0 0 18 18">
-                                                <path stroke="currentColor" stroke-linecap="round"
-                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
                             </tr>
                             {% endfor %}
                             <script>
@@ -141,7 +128,7 @@
                         </tbody>
                         <tbody>
                             <tr>
-                                <td colspan="4">
+                                <td colspan="2">
                                     <div id="frameDropdown"
                                         class="mt-1 items-center rounded-md flex justify-between bg-gradient-to-tl from-secondary to-primary cursor-pointer">
                                         <h1
@@ -155,6 +142,21 @@
                                                 stroke-width="2"
                                                 d="M16.881 16H7.119a1 1 0 0 1-.772-1.636l4.881-5.927a1 1 0 0 1 1.544 0l4.88 5.927a1 1 0 0 1-.77 1.636Z" />
                                         </svg>
+                                    </div>
+                                </td>
+                                <td class="w-[5.8vw] h-full">
+                                    <div class="w-[5.8vw] flex cursor-pointer rounded-md bg-gradient-to-tl from-secondary
+                                        to-primary text-primary hover:text-white text-lg font-semibold ml-1 mt-2
+                                        p-[2px]" id="buyItems-Supplier2">
+                                        <button class="w-full justify-center items-center flex rounded-md border-0 bg-white px-1
+                                        py-[0.85rem] outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
+                                        hover:text-white ">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -190,54 +192,6 @@
                                         </h1>
                                     </div>
                                 </td>
-                                <td class="w-[5vw]">
-                                    <div class="w-[5vw] flex cursor-pointer rounded-md bg-gradient-to-tl from-secondary
-                                        to-primary text-primary hover:text-white text-lg font-semibold ml-1 my-1
-                                        p-[2px]">
-                                        <!-- <div id="counter-{{ loop.index }}"
-                                            class="transition duration-500 group-hover:flex h-full w-[75%] justify-center items-center">
-                                            <div
-                                                class="h-full w-full flex justify-center items-center text-white font-semibold bg-transparent">
-                                                <div class="flex w-full h-full justify-center items-center">
-                                                    <button type="button" id="decrement-button-{{ loop.index }}"
-                                                        data-input-counter-decrement="quantity-input-{{ item['name'] }}"
-                                                        class="bg-white rounded-md mr-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
-                                                        <svg class="text-primary w-2 h-2" aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 2">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
-                                                        </svg>
-                                                    </button>
-                                                    <input type="text" name="quantity-{{ item['name'] }}"
-                                                        data-input-counter id="quantity-input-{{ item['name'] }}"
-                                                        class="rounded-md bg-gray-50 border-x-0 h-auto text-center text-gray-900 text-sm focus:ring-secondary focus:border-secoring-secondary block w-[40%]"
-                                                        placeholder="0" required />
-                                                    <button type="button" id="increment-button{{ loop.index }}"
-                                                        data-input-counter-increment="quantity-input-{{ item['name'] }}"
-                                                        class="bg-white rounded-md ml-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
-                                                        <svg class="text-primary w-2 h-2" aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 18">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2"
-                                                                d="M9 1v16M1 9h16" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div> -->
-                                        <button class="w-full justify-center items-center flex rounded-md border-0 bg-white px-1
-                                        py-3 outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
-                                        hover:text-white ">
-                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                                fill="none" viewBox="0 0 18 18">
-                                                <path stroke="currentColor" stroke-linecap="round"
-                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
                             </tr>
                             {% endfor %}
                             <script>
@@ -263,7 +217,7 @@
                         </tbody>
                         <tbody>
                             <tr>
-                                <td colspan="4">
+                                <td colspan="2">
                                     <div id="sparePartDropdown"
                                         class="mt-1 items-center rounded-md flex justify-between bg-gradient-to-tl from-secondary to-primary cursor-pointer">
                                         <h1
@@ -279,6 +233,21 @@
                                         </svg>
                                     </div>
                                 </td>
+                                <td class="w-[5.8vw] h-full">
+                                    <div class="w-[5.8vw] flex cursor-pointer rounded-md bg-gradient-to-tl from-secondary
+                                        to-primary text-primary hover:text-white text-lg font-semibold ml-1 mt-2
+                                        p-[2px]" id="buyItems-Supplier3">
+                                        <button class="w-full justify-center items-center flex rounded-md border-0 bg-white px-1
+                                        py-[0.85rem] outline-0 hover:bg-gradient-to-tl from-secondary to-primary text-primary
+                                        hover:text-white ">
+                                            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                                fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -286,6 +255,8 @@
             </div>
         </div>
     </div>
+    {% include 'modalWarehouse.html' %}
+
     {% with messages = get_flashed_messages(with_categories=True) %}
     {% if messages %}
     <div id="modal-1" class="modal-container blur-background overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-[10001]
