@@ -1020,13 +1020,12 @@ def confirm_purchase():
 
     try:
         # Send POST request to external API
-        if supplier_name == "SUP01":
+        if supplier_name == "Supplier 1":
             response = requests.post('http://167.99.238.114:8000/place_order', json=payload)
-        # elif supplier_name == "SUP02":
-        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        # elif supplier_name == "Supplier 2":
+        #     response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
         # else:
-        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
-        
+        #     response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
         if response.status_code == 200:
             result = response.json()
 

@@ -289,7 +289,7 @@
                         </button>
                     </div>
                     <div class="{% if category == 'error' %} py-2 px-4 md:px-6 {% else %} p-4 md:p-6 {% endif %}">
-                        <div class="w-full h-full flex justify-start items-center z-100">
+                        <div class="w-full h-full flex flex-col justify-center items-start z-100">
                             {% for category, message in messages %}
                             <div
                                 class="text-xl font-semibold mb-3 {% if category == 'success' %} text-green-600 {% elif category == 'error' %} text-red-600 {% endif %}">
