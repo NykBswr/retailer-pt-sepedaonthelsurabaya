@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+<div id="modal"
+    class="fixed modal-container blur-background2 overflow-y-auto overflow-x-hidden top-0 right-0 left-0 z-[10001] justify-center items-center w-full md:inset-0 h-full">
+    <div class="w-full h-full flex justify-center items-center relative">
+        <div class="box-gradient-border-third p-8 rounded-lg w-[50vw]">
+            <h2 class="text-xl font-bold mb-4">Confirm Purchase</h2>
+            <form id="confirmPurchaseForm" method="POST" action="{{ url_for('confirm_purchase') }}">
+                <div class="w-full">
+                    <div class="w-full overflow-y-auto h-[30vh] pr-2">
+                        <table class="w-full table-auto">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <h1
+                                            class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mr-1 px-3 py-2 text-start">
+                                            Name
+                                        </h1>
+                                    </th>
+                                    <th>
+                                        <h1
+                                            class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-center">
+                                            Amount
+                                        </h1>
+                                    </th>
+                                    <th>
+                                        <h1
+                                            class="bg-gradient-to-tl from-secondary to-primary text-white rounded-md text-lg mx-1 px-3 py-2 text-start">
+                                            Price
+                                        </h1>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cart in supplier1_new_items %}
+                                <tr>
+                                    <td>
+                                        <div
+                                            class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mr-1 my-1 p-[2px]">
+                                            <h1 class="flex rounded-md border-0 bg-white px-1 py-2 text-xs
+                                                text-primary  outline-0 md:text-sm lg:text-base">
+                                                {{ cart.name }}
+                                            </h1>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div
+                                            class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                            <h1
+                                                class="flex rounded-md border-0 bg-white px-1 py-2 text-xs outline-0 text-primary md:text-sm lg:text-base">
+                                                {{ cart.quantity }}
+                                            </h1>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div
+                                            class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                            <h1
+                                                class="flex rounded-md border-0 bg-white px-1 py-2 text-xs outline-0 text-primary md:text-sm lg:text-base">
+                                                {{ cart.price | currency }}
+                                            </h1>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- Hidden inputs for id_product and quantity -->
+                                <input type="hidden" name="cart[{{ loop.index0 }}][id_product]"
+                                    value="{{ cart.id_produk }}">
+                                <input type="hidden" name="cart[{{ loop.index0 }}][quantity]"
+                                    value="{{ cart.quantity }}">
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if harga_pengiriman and lama_pengiriman %}
+                    <h1 class="text-xl text-semibold text-primary">
+                        Total Price: <p class="font-bold">{{ total_harga_barang | currency }}</p>
+                    </h1>
+                    <h1 class="text-xl text-semibold text-primary">
+                        Shipping Fee: <p class="font-bold">{{ harga_pengiriman | int }}</p>
+                    </h1>
+                    <h1 class="text-xl text-semibold text-primary">
+                        Delivery Time: <p class="font-bold">{{ lama_pengiriman }}</p>
+                    </h1>
+                    <h1 class="text-xl text-semibold text-primary">
+                        Total Price + Shipping Fee: <p class="font-bold">
+                            {{ total_price | currency }}
+                        </p>
+                    </h1>
+                    {% endif %}
+
+                    <!-- Hidden form inputs to send other data -->
+                    <input type="hidden" name="supplier_name" value="{{ supplier_name }}">
+                    <input type="hidden" name="distributor" value="{{ distributor }}">
+                    <input type="hidden" name="total_price"
+                        value="{{ (total_harga_barang | int) + (harga_pengiriman | int) }}">
+                    <input type="hidden" name="id_log" value="{{ id_log }}">
+                </div>
+                <div class="w-full flex justify-end">
+                    <div class="cursor-pointer text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-red-500"
+                        id="cancel" onclick="window.location.href='{{ url_for('cancel_purchase') }}'">
+                        Cancel
+                    </div>
+                    <button
+                        class="text-xl font-semibold ml-2 bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-primary"
+                        id="buy">
+                        Confirm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

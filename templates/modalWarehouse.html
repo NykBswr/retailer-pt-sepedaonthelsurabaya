@@ -38,12 +38,16 @@
                         </thead>
                         <tbody>
                             {% set stock_list = [] %}
+                            {% set idSUP = [] %}
                             {% if supplier.name == 'Supplier 1' %}
                             {% set stock_list = list_stock1 %}
+                            {% set idSUP = SUP01 %}
                             {% elif supplier.name == 'Supplier 2' %}
                             {% set stock_list = list_stock2 %}
+                            {% set idSUP = SUP02 %}
                             {% elif supplier.name == 'Supplier 3' %}
                             {% set stock_list = list_stock3 %}
+                            {% set idSUP = SUP03 %}
                             {% endif %}
                             {% for item in stock_list %}
                             <tr>
@@ -83,7 +87,7 @@
                                                 class="h-full w-full flex justify-center items-center text-white font-semibold bg-transparent">
                                                 <div class="flex w-full h-full justify-center items-center">
                                                     <button type="button" id="decrement-button-{{ supplier.id }}"
-                                                        data-input-counter-decrement="quantity-input-{{ item['name'] }}"
+                                                        data-input-counter-decrement="quantity-input-{{ item.name }}"
                                                         class="bg-white rounded-md mr-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
                                                         <svg class="text-primary w-2 h-2" aria-hidden="true"
                                                             xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -92,12 +96,12 @@
                                                                 stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
                                                         </svg>
                                                     </button>
-                                                    <input type="text" name="quantity-{{ item['name'] }}"
-                                                        data-input-counter id="quantity-input-{{ item['name'] }}"
+                                                    <input type="text" name="quantity-{{ item.name }}"
+                                                        data-input-counter id="quantity-input-{{ item.name }}"
                                                         class="rounded-md bg-gray-50 border-x-0 h-auto text-center text-gray-900 text-sm focus:ring-secondary focus:border-secoring-secondary block w-[40%]"
-                                                        placeholder="0" required />
+                                                        placeholder="0" min="0" />
                                                     <button type="button" id="increment-button{{ supplier.id }}"
-                                                        data-input-counter-increment="quantity-input-{{ item['name'] }}"
+                                                        data-input-counter-increment="quantity-input-{{ item.name }}"
                                                         class="bg-white rounded-md ml-1 p-[0.9rem] h-full w-[30%] focus:outline-none">
                                                         <svg class="text-primary w-2 h-2" aria-hidden="true"
                                                             xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -144,21 +148,21 @@
                                 </ul>
                             </div>
                         </div>
-                        <input type="hidden" id="selecteddistInput-{{ supplier.id }}" name="dist" value="">
+                        <input type="hidden" id="selecteddistInput-{{ supplier.id }}" name="dist-{{ supplier.id }}">
 
                         <script>
-                            // List of distributors
+                            // List of dists
                             const dists = [{
-                                    id: "DIS01",
-                                    distributor: "Distributor 1"
+                                    id: "Distributor1",
+                                    distributor: "DIS01"
                                 },
                                 {
-                                    id: "DIS02",
-                                    distributor: "Distributor 2"
+                                    id: "Distributor2",
+                                    distributor: "DIS02"
                                 },
                                 {
-                                    id: "DIS03",
-                                    distributor: "Distributor 3"
+                                    id: "Distributor3",
+                                    distributor: "DIS03"
                                 }
                             ];
 
@@ -193,18 +197,15 @@
                             // Populate dist list
                             dists.forEach((distObj) => {
                                 const distItem = document.createElement('li');
-                                distItem.textContent = distObj
-                                    .distributor; // Use 'distributor' instead of 'dist'
+                                distItem.textContent = distObj.distributor;
                                 distItem.className =
-                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1";
+                                    "cursor-pointer bg-white px-3 py-2 hover:bg-gradient-to-tl from-secondary to-primary font-semibold hover:text-white text-dark rounded-md my-1 ";
                                 distItem.addEventListener('click', () => {
                                     selecteddist = distObj.id;
-                                    selecteddistText.textContent = distObj
-                                        .distributor; // Use 'distributor' instead of 'dist'
+                                    selecteddistText.textContent = distObj.distributor;
 
                                     // Set value to hidden input
-                                    selecteddistInput.value = distObj
-                                        .distributor; // Use 'distributor' instead of 'dist'
+                                    selecteddistInput.value = distObj.distributor;
 
                                     isdistOpen = false;
                                     distDropdown.classList.add('hidden');
@@ -215,6 +216,7 @@
                                 distList.appendChild(distItem);
                             });
                         </script>
+
                     </div>
                     <div class="w-1/2 flex justify-end">
                         <div class="cursor-pointer text-xl font-semibold bg-gradient-to-tl from-secondary to-primary text-white px-4 py-2 rounded-md hover:bg-red-500"

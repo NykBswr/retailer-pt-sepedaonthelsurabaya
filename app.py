@@ -623,7 +623,6 @@ def warehouse():
     db = firestore.client()
     items_ref = db.collection(u'items')
     
-    # Mendefinisikan informasi untuk kedua supplier
     suppliers = [
         {
             'name': 'Supplier 1',
@@ -653,7 +652,7 @@ def warehouse():
         #     'weight': 'berat'
         # }
     ]
-    
+
     # Fungsi untuk memproses setiap supplier
     def process_supplier(supplier):
         supplier_name = supplier['name']
@@ -662,7 +661,7 @@ def warehouse():
         key_price = supplier['key_price']
         key_id = supplier['key_id']
         key_stock = supplier['key_stock']
-        # weight = supplier['weight']
+        weight = supplier['weight']
         
         response = requests.get(url)
         if response.status_code == 200:
@@ -688,7 +687,7 @@ def warehouse():
             product_name = item_api.get(key_name)
             product_price = item_api.get(key_price)
             supplier_id = item_api.get(key_id)
-            # weight = item_api.get(weight, 0)
+            weight = item_api.get(weight, 0)
             stock = item_api.get(key_stock, 0)
             
             if not product_name or not supplier_id:
@@ -764,7 +763,7 @@ def warehouse():
                 'stock': stock,
                 'price': product_price_int,
                 'supplier': supplier_name,
-                # 'weight': weight,
+                'weight': weight,
             })
         
         # Mengidentifikasi produk yang ada di Firestore tetapi tidak ada di API
@@ -804,6 +803,8 @@ def warehouse():
         {'id': 'Supplier2', 'name': 'Supplier 2'},
         {'id': 'Supplier3', 'name': 'Supplier 3'},
     ]
+
+
     # Render the warehouse page dengan daftar item yang diperbarui
     return render_template(
         'warehouse.html',
@@ -819,10 +820,260 @@ def warehouse():
         list_stock2=list_stock2,
         # list_stock3=list_stock3
     )
-@app.route('/warehouse/addItems/', methods=['POST'])
-def addItems():
+@app.route('/addItems/<supplier_name>', methods=['POST'])
+def addItems(supplier_name):
     if 'logged_in' not in session:
         return redirect(url_for('signin'))
+
+    # Tentukan ID supplier berdasarkan supplier_name
+    supplier_map = {
+        "Supplier 1": "SUP01",
+        "Supplier 2": "SUP02",
+        "Supplier 3": "SUP03"
+    }
+
+    suppliers = [
+        {
+            'name': 'Supplier 1',
+            'url': 'http://167.99.238.114:8000/products',
+            'key_name': 'nama_produk',
+            'key_price': 'harga',
+            'key_id': 'id_produk',
+            'key_stock': 'stock',
+            'weight': 'berat'
+        },
+        {
+            'name': 'Supplier 2',
+            'url': 'https://suplierman.pythonanywhere.com/products/api/products',
+            'key_name': 'nama_produk',
+            'key_price': 'harga',
+            'key_id': 'id_produk',
+            'key_stock': 'stock',
+            'weight': 'berat'
+        },
+        {
+            'name': 'Supplier 3',
+            'url': 'https://suplierman.pythonanywhere.com/products/api/products',
+            'key_name': 'nama_produk',
+            'key_price': 'harga',
+            'key_id': 'id_produk',
+            'key_stock': 'stock',
+            'weight': 'berat'
+        }
+    ]
+
+    supplier_id = supplier_map.get(supplier_name)
+
+    # Cari supplier yang sesuai
+    supplier_info = next((supplier for supplier in suppliers if supplier['name'] == supplier_name), None)
+
+    if not supplier_info:
+        flash("Invalid supplier name.", "error")
+        return redirect(url_for('warehouse'))
+
+    # Ambil data produk dari API supplier
+    try:
+        response = requests.get(supplier_info['url'])
+        if response.status_code != 200:
+            flash(f"Failed to retrieve products from {supplier_name}.", "error")
+            return redirect(url_for('warehouse'))
+        items_api = response.json()  # Asumsikan responnya dalam format JSON
+    except Exception as e:
+        flash(f"Error fetching products from {supplier_name}: {str(e)}", "error")
+        return redirect(url_for('warehouse'))
+
+    # Inisialisasi data dari form
+    cart = []
+    total_price = 0
+    total_weight = 0
+
+    # Ambil data input dari form (items dan quantity)
+    for key, value in request.form.items():
+        if key.startswith("quantity-"):
+            product_name = key.replace("quantity-", "")
+
+            # Pastikan value tidak kosong
+            if value.strip() == "":
+                continue
+
+            try:
+                quantity = int(value)
+            except ValueError:
+                quantity = 0  # Tetapkan ke 0 jika tidak valid
+
+            if quantity > 0:
+                # Cari produk dalam items_api berdasarkan nama produk
+                item_api = next((item for item in items_api if item[supplier_info['key_name']] == product_name), None)
+
+                if item_api:
+                    product_price = item_api.get(supplier_info['key_price'], 0)
+                    product_weight = item_api.get(supplier_info['weight'], 0)
+                    product_id = item_api.get(supplier_info['key_id'])
+
+                    # Hitung total harga dan berat
+                    total_price += int(product_price) * quantity
+                    total_weight += float(product_weight) * quantity
+
+                    # Tambahkan ke keranjang
+                    cart.append({
+                        "name": product_name,
+                        "id_produk": product_id,
+                        "quantity": quantity,
+                        'price': product_price,
+                    })
+
+    if supplier_id == "SUP01":
+        supdis = "Supplier1"
+    elif supplier_id == "SUP02":
+        supdis = "Supplier2"
+    else:
+        supdis = "Supplier3"
+    # Tangkap distributor yang dipilih dari form
+    distributor = request.form.get(f"dist-{supdis}")
+
+    if not distributor:
+        flash("Distributor not selected.", "error")
+        return redirect(url_for('warehouse'))
+
+    # Siapkan data yang akan dikirim ke API check_price
+    payload = {
+        "id_supplier": supplier_id,
+        "cart": cart,
+        "id_retail": "RET03",
+        "id_distributor": distributor,
+        "total_harga_barang": total_price,
+        "total_berat_barang": total_weight,
+        "kota_tujuan": "bali"
+    }
+
+    # return jsonify(payload)
+
+    try:
+        check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        check_price_data = check_price_response.json()
+
+        # Tampilkan hasil jika berhasil
+        if check_price_response.status_code == 200:
+            # Ambil informasi yang dibutuhkan dari respons
+            harga_pengiriman = check_price_data.get("harga_pengiriman")
+            lama_pengiriman = check_price_data.get("lama_pengiriman")
+            id_log = check_price_data.get("transaction_id")
+            try:
+                total_price = int(total_price)
+                harga_pengiriman = int(harga_pengiriman) 
+                totalll = total_price + harga_pengiriman # atau float(harga_pengiriman) jika diperlukan
+            except ValueError:
+                flash("Invalid price format.", "error")
+                return redirect(url_for('warehouse'))
+            # Tampilkan informasi di halaman hasil
+            return render_template("result.html", 
+                                    supplier_name=supplier_name,
+                                    supplier1_new_items=cart, 
+                                    harga_pengiriman=harga_pengiriman, 
+                                    lama_pengiriman=lama_pengiriman,
+                                    total_harga_barang=total_price,
+                                    total_price=totalll,
+                                    id_log=id_log,
+                                    distributor=distributor)
+        else:
+            flash("Failed to check price.", "error")
+            return redirect(url_for('warehouse'))
+
+    except Exception as e:
+        flash(f"Error checking price: {str(e)}", "error")
+        return redirect(url_for('warehouse'))
+
+@app.route('/confirm_purchase', methods=['POST'])
+def confirm_purchase():
+    # Extract data from the form
+    supplier_name = request.form.get('supplier_name')
+    distributor = request.form.get('distributor')
+    total_price = request.form.get('total_price')
+    id_log = request.form.get('id_log')
+
+    # Create the payload to send to the external API
+    formatted_cart = []
+
+    for i in range(len(request.form) // 2):
+        id_product = request.form.get(f'cart[{i}][id_product]')
+        quantity = request.form.get(f'cart[{i}][quantity]')
+        if id_product and quantity:
+            formatted_cart.append({
+                'id_product': id_product,
+                'quantity': int(quantity)  # Ensure quantity is an integer
+            })
+
+    payload = {
+        "id_supplier": supplier_name,
+        "id_log": id_log,
+        "distributor": distributor,
+        "total_price": total_price,
+        "cart": formatted_cart
+    }
+
+    try:
+        # Send POST request to external API
+        response = requests.post('http://167.99.238.114:8000/place_order', json=payload)
+        if response.status_code == 200:
+            result = response.json()
+
+            # Get no_resi and purchase_id from the API response
+            no_resi = result.get('no_resi')
+            purchase_id = result.get('purchase_id')
+
+            # Save no_resi and purchase_id to Firestore in the purchased_item collection
+            purchased_item_ref = db.collection('purchased_item').document(purchase_id)
+            purchased_item_ref.set({
+                'no_resi': no_resi,
+                'purchase_id': purchase_id,
+                'supplier_name': supplier_name,
+                'distributor': distributor,
+                'total_price': total_price,
+                'id_log': id_log,
+                'cart': formatted_cart,
+                'created_at': firestore.SERVER_TIMESTAMP
+            })
+
+            # Update quantity for each product in the items collection
+            for item in formatted_cart:
+                product_id = item['id_product']
+                purchased_quantity = item['quantity']
+
+                # Query to find the item in the 'items' collection by supplier_id and product_id
+                items_query = db.collection('items').where('supplier_id', '==', product_id)
+
+                # Get the documents matching the query
+                docs = items_query.stream()
+
+                found = False
+                for doc in docs:
+                    found = True
+                    item_data = doc.to_dict()
+                    current_quantity = item_data.get('amount', 0)
+
+                    # Update the quantity by subtracting the purchased quantity
+                    new_quantity = max(0, current_quantity + purchased_quantity)  # Prevent negative quantity
+
+                    # Update the document with the new quantity
+                    doc.reference.update({'amount': new_quantity})
+
+                if not found:
+                    # Handle case where the item with supplier_id and product_id doesn't exist
+                    flash(f"Item with ID {product_id} and supplier {supplier_name} not found in 'items' collection.", "error")
+
+            flash("Order placed successfully and saved to the warehouse, items updated!", "success")
+        else:
+            flash(f"Failed to place order. Status code: {response.status_code}", "error")
+
+    except Exception as e:
+        flash(f"An error occurred: {str(e)}", "error")
+
+    return redirect(url_for('warehouse'))
+
+
+@app.route('/cancel_purchase')
+def cancel_purchase():
+    flash("Purchase canceled.", "success")
     return redirect(url_for('warehouse'))
 
 # API
