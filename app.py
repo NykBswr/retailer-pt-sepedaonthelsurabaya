@@ -25,7 +25,7 @@ firebaseConfig = {
 }
 
 # Inisialisasi Firestore dengan Firebase Admin SDK
-cred = credentials.Certificate('retail.json')
+cred = credentials.Certificate('retailptsepedaonthelsurabaya-firebase-adminsdk-hjdab-8749cbf305.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
