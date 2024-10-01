@@ -8,6 +8,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import firebase_admin
 from firebase_admin import credentials, firestore
+from collections import defaultdict
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -25,7 +27,7 @@ firebaseConfig = {
 }
 
 # Inisialisasi Firestore dengan Firebase Admin SDK
-cred = credentials.Certificate('retail.json')
+cred = credentials.Certificate('retailptsepedaonthelsurabaya-firebase-adminsdk-hjdab-8749cbf305.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -155,6 +157,8 @@ def signout():
     session.pop('logged_in', None)
     session.pop('username', None)
     return redirect(url_for('index'))
+
+#tracking
 
 # Product
 @app.route('/product')
@@ -460,7 +464,86 @@ def dashboard():
         purchase_data['total_transaction_price'] = total_transaction_price
         purchase_list.append(purchase_data)
 
-    return render_template('dashboard.html', username=session.get('username'), purchases=purchase_list)
+    # BARU
+    products_ref = db.collection(u'product')
+    products = products_ref.stream()
+
+    items_ref = db.collection(u'items')
+    items = items_ref.stream()
+    item_stock = {}
+    for item in items:
+        item_data = item.to_dict()
+        item_stock[item_data['name']] = int(item_data['amount'])
+
+    product_list = []
+    
+    for product in products:
+        product_data = product.to_dict()
+        product_data['id'] = product.id 
+
+        # Ambil requirement produk
+        wheel = product_data.get('wheel', None)
+        frame = product_data.get('frame', None)
+
+        # Cek stok untuk setiap requirement dari warehouse
+        wheel_stock = item_stock.get(wheel, 0)
+        frame_stock = item_stock.get(frame, 0)
+
+        # Hitung stok minimal berdasarkan requirement (misal, ban dan frame harus ada)
+        product_stock = min(wheel_stock, frame_stock) if wheel and frame else 0
+
+        # Tambahkan data stok ke dalam data produk
+        product_data['stock'] = product_stock
+        product_list.append(product_data)
+
+    product_stocks = [product['stock'] for product in product_list]
+    product_names = [product['name'] for product in product_list]
+
+    
+    # Siapkan data untuk visualisasi Chart 1 dan Chart 2
+    monthly_sales = defaultdict(lambda: defaultdict(int))
+    monthly_revenue = defaultdict(int)
+    
+    for purchase in purchase_list:
+        if 'timestamp' in purchase:
+            month = purchase['timestamp'].strftime("%B")
+            for product in purchase.get('detailed_products', []):
+                product_name = product.get('name', 'Unknown')
+                quantity = product.get('quantity', 0)
+                price = product.get('price', 0)
+                monthly_sales[month][product_name] += quantity
+                monthly_revenue[month] += quantity * price
+
+    # Siapkan data untuk Chart 1 (Revenue)
+    all_months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+    revenue_data = [monthly_revenue.get(month, 0) for month in all_months]
+
+    # Siapkan data untuk Chart 2 (Sales per Product)
+    labels = all_months
+    all_products = set()
+    for month_data in monthly_sales.values():
+        all_products.update(month_data.keys())
+    
+    series = []
+    for product in all_products:
+        product_data = []
+        for month in labels:
+            product_data.append(monthly_sales[month].get(product, 0))
+        series.append({
+            'name': product,
+            'data': product_data
+        })
+
+    # Render template dengan data penjualan dan pendapatan bulanan
+    return render_template('dashboard.html', 
+                        username=session.get('username'), 
+                        purchases=purchase_list, 
+                        products=product_list, 
+                        product_stocks=product_stocks, 
+                        product_names=product_names,
+                        sales_data=series,
+                        revenue_data=revenue_data,
+                        months=labels)
 @app.route('/edit_transaction/<transaction_id>', methods=['POST'])
 def edit_transaction(transaction_id):
     if 'logged_in' not in session:
@@ -626,7 +709,7 @@ def warehouse():
     suppliers = [
         {
             'name': 'Supplier 1',
-            'url': 'http://167.99.238.114:8000/products',
+            'url': 'http://167.99.238.114:8000/api/products',
             'key_name': 'nama_produk',
             'key_price': 'harga',
             'key_id': 'id_produk',
@@ -835,7 +918,7 @@ def addItems(supplier_name):
     suppliers = [
         {
             'name': 'Supplier 1',
-            'url': 'http://167.99.238.114:8000/products',
+            'url': 'http://167.99.238.114:8000/api/products',
             'key_name': 'nama_produk',
             'key_price': 'harga',
             'key_id': 'id_produk',
@@ -853,7 +936,7 @@ def addItems(supplier_name):
         },
         {
             'name': 'Supplier 3',
-            'url': 'https://suplierman.pythonanywhere.com/products/api/products',
+            'url': 'https://supplier3.pythonanywhere.com/api/products',
             'key_name': 'nama_produk',
             'key_price': 'harga',
             'key_id': 'id_produk',
@@ -951,7 +1034,7 @@ def addItems(supplier_name):
     try:
 
         if supplier_id == "SUP01":
-            check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+            check_price_response = requests.post("http://167.99.238.114:8000/api/check_price", json=payload)
         # elif supplier_id == "SUP02":
         #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
         # else:
@@ -1021,7 +1104,7 @@ def confirm_purchase():
     try:
         # Send POST request to external API
         if supplier_name == "Supplier 1":
-            response = requests.post('http://167.99.238.114:8000/place_order', json=payload)
+            response = requests.post('http://167.99.238.114:8000/api/place_order', json=payload)
         # elif supplier_name == "Supplier 2":
         #     response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
         # else:
@@ -1185,6 +1268,58 @@ def post_products():
     
     except Exception as e:
         return jsonify({"message": f"Error processing purchase: {str(e)}", "status": "error"}), 500
+    # Track Order
+
+@app.route('/tracking')
+def tracking():
+    # Ambil pesanan dari Firebase
+    db = firestore.client()
+    purchases_ref = db.collection(u'purchased_item')
+    purchases = purchases_ref.stream()
+    
+    # Jika tidak ada pesanan ditemukan, set orders ke dict kosong
+    orders = {purchase.id: purchase.to_dict() for purchase in purchases} if purchases else {}
+    
+    return render_template('tracking.html', orders=orders)
+
+@app.route('/api/track/order', methods=['POST'])
+def track_order():
+    data = request.get_json()
+    print(data)
+
+    if not data.get('no_resi') or not data.get('id_distributor'):  # Pastikan no_resi dan id_distributor ada
+        return jsonify({"error": "No resi, ID distributor, dan ID Supplier diperlukan"}), 400
+
+    distributor_data = {}
+    try:
+        if data['id_distributor'] == 'DIS01':
+            response = requests.get('http://167.99.238.114:8000/track_order')  # Ganti endpoint
+        elif data['id_distributor'] == 'DIS02':
+            response = requests.get('http://167.99.238.114:8000/track_order')  # Sesuaikan endpoint jika berbeda
+        elif data['id_distributor'] == 'DIS03':
+            response = requests.get(f"http://159.223.41.243:8000/api/status/{data['no_resi']}")  # Sesuaikan endpoint jika berbeda
+        else:
+            return jsonify({"error": "Supplier tidak dikenali"}), 400
+
+        distributor_data = response.json()
+        distributor_data['no_resi'] = data['no_resi']
+        distributor_data['status'] = "Arrived"
+        return jsonify(distributor_data), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Gagal menghubungi distributor: {str(e)}"}), 500
+
+def get_data_pemesanan():
+    # Fetch orders from Firebase
+    db = firestore.client()
+    purchases_ref = db.collection(u'purchased_item')
+    purchases = purchases_ref.stream()
+    
+    # Jika tidak ada pesanan ditemukan, set orders ke dict kosong
+    orders = {purchase.id: purchase.to_dict() for purchase in purchases} if purchases else {}
+
+    return jsonify(orders), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)

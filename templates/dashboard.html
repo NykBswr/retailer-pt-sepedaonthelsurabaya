@@ -356,6 +356,149 @@
         <div class="flex ml-2 flex-col rounded-md p-8 w-1/2 overflow-y-auto h-[69vh] border-[5px] border-secondary">
             <div class="w-full h-full overflow-y-auto">
                 <!-- Visualization -->
+                <!-- Visualization -->
+                <div class="p-4 rounded-lg shadow-md mb-8">
+                    <h2 class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-center text-2xl font-extrabold text-transparent">Performa Penjualan (Jumlah Untung per Bulan)</h2>
+                    <hr class="my-4 border-gray-300">
+                    <div class="pt-5" id="chart1"></div>
+                </div>
+                <div class="p-4 rounded-lg shadow-md mb-8">
+                    <h2 class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-center text-2xl font-extrabold text-transparent">Performa Penjualan (Jumlah Model Terjual per Bulan)</h2>
+                    <hr class="my-4 border-gray-300">
+                    <div class="pt-5" id="chart2"></div>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-md mb-8">
+                    <h2 class="bg-gradient-to-tl from-secondary to-primary bg-clip-text text-center text-2xl font-extrabold text-transparent">Stok Gudang</h2>
+                    <hr class="my-4 border-gray-300">
+                    <div class="pt-5" id="chart3"></div>
+                </div>
+                <script>
+                    const revenueData = JSON.parse('{{ revenue_data|tojson|safe }}');
+                    const monthsData = JSON.parse('{{ months|tojson|safe }}');
+
+                    console.log('Revenue Data:', revenueData);
+                    console.log('Months:', monthsData);
+
+                    const chart1Data = {
+                        series: [{
+                            name: 'Jumlah Untung',
+                            data: revenueData
+                        }],
+                        chart: {
+                            type: 'area',
+                            height: 300,
+                        },
+                        xaxis: {
+                            categories: monthsData
+                        },
+                        colors: [
+                            '#2D3945',
+                            '#4B6A9B',
+                            '#819EB9',
+                            '#A9B5C9',
+                            '#D3D3D3',
+                        ],
+                        dataLabels: {
+                            enabled: false
+                        },
+                        stroke: {
+                            curve: 'smooth'
+                        },
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.7,
+                                opacityTo: 0.9,
+                                stops: [0, 90, 100]
+                            }
+                        },
+                    };
+                    const chart1 = new ApexCharts(document.querySelector("#chart1"), chart1Data);
+                    chart1.render();
+                    // Pastikan data sales_data dan product_names terisi dengan benar di app.py
+                    const chart3Data = {
+                        series: JSON.parse('{{ product_stocks|tojson|safe }}'),
+                        labels: JSON.parse('{{ product_names|tojson|safe }}').map(name => name), // Menggunakan nama asli produk
+                        chart: {
+                            type: 'donut',
+                            height: 300
+                        },
+                        colors: [
+                            '#4B6A9B',
+                            '#2D3945',
+                            '#819EB9',
+                            '#A9B5C9',
+                            '#D3D3D3',
+                        ],
+                    };
+                    const chart3 = new ApexCharts(document.querySelector("#chart3"), chart3Data);
+                    chart3.render();
+
+                    
+                    //Chart 2
+                    const salesData = JSON.parse('{{ sales_data|tojson|safe }}');
+                    const months = JSON.parse('{{ months|tojson|safe }}');
+
+                    console.log('Sales Data:', salesData);
+                    console.log('Months:', months);
+                    
+                    const chart2Data = {
+                        series: salesData,
+                        chart: {
+                            type: 'bar',
+                            height: 350,
+                            stacked: true,
+                        },
+                        chart: {
+                            type: 'bar',
+                            height: 300,
+                            stacked: true
+                        },
+                        xaxis: {
+                            categories: months
+                        },
+                        responsive: [{
+                            breakpoint: 480,
+                            options: {
+                                legend: {
+                                    position: 'bottom',
+                                    offsetX: -10,
+                                    offsetY: 0
+                                }
+                            }
+                        }],
+                        colors: [
+                            '#2D3945',
+                            '#4B6A9B',
+                            '#819EB9',
+                            '#A9B5C9',
+                            '#D3D3D3',
+                        ],
+                        plotOptions: {
+                            bar: {
+                                horizontal: false,
+                                borderRadius: 10,
+                                columnWidth: '40%',
+                                endingShape: 'rounded',
+                                dataLabels: {
+                                    total: {
+                                        enabled: true,
+                                        style: {
+                                            fontSize: '12px',
+                                            fontWeight: 900
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                    };
+                    const chart2 = new ApexCharts(document.querySelector("#chart2"), chart2Data);
+                    chart2.render();
+
+                    console.log('Chart2 element:', document.querySelector("#chart2"));
+                    console.log('ApexCharts defined:', typeof ApexCharts !== 'undefined');
+                </script>
             </div>
         </div>
     </div>

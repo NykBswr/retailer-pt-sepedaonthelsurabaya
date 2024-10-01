@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block content %}
+            <div class="container mx-auto mt-8">
+
+                <div class="flex justify-between items-start mb-6">
+                    <!-- Tabel Transaksi -->
+                    <h1 class="text-4xl font-bold">Status Pemesanan</h1>
+
+                    <div class="flex flex-col space-y-4">
+                        <!-- Kotak Pesan Sukses -->
+                        <div id="successBox"
+                            class="hidden bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl w-64">
+                            <p id="successMessage"></p>
+                        </div>
+                        <!-- Kotak Pesan Error -->
+                        <div id="errorBox" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl w-64">
+                            <p id="errorMessage"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    {% if orders %}
+                    <div class="overflow-x-auto shadow-md rounded-lg text-xs">
+                        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600">
+                                        ID Resi</th>
+                                    <th
+                                        class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600">
+                                        Tanggal</th>
+                                    <th
+                                        class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600">
+                                        Total Harga</th>
+                                    <th
+                                        class="py-2 px-4 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600">
+                                        Lama Pengiriman</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order_id, order in orders.items() %}
+                                <tr>
+                                    <td class="py-2 px-4 border-b border-gray-200">{{ order.no_resi }}</td>
+                                    <td class="py-2 px-4 border-b border-gray-200">{{ order.created_at }}</td>
+                                    <td class="py-2 px-4 border-b border-gray-200">
+                                        Rp{{ "{:,}".format(order.total_price|int) }}</td>
+                                    <td class="py-2 px-4 border-b border-gray-200">
+                                        <button
+                                            onclick="event.preventDefault(), trackOrder('{{ order.distributor }}', '{{ order.no_resi }}')"
+                                            class="bg-yellow-400 text-white rounded-md py-2 px-4 text-sm font-semibold hover:bg-yellow-500 transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400">
+                                            Lacak Pesanan
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-gray-500">Tidak ada pemesanan saat ini.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Modal Tracking -->
+            <div id="checkoutModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center">
+                <div class="bg-white p-8 rounded-lg shadow-xl">
+                    <h2 class="text-2xl font-bold mb-4">Tracking Pesanan</h2>
+                    <div id="orderDetails"></div>
+                    <div class="mt-4 flex justify-end">
+                        <button id="confirmButton" onclick="event.preventDefault(), confirmOrder()"
+                            class="bg-[#40DDC1] text-white rounded-md py-2 px-4 text-sm font-semibold hover:bg-[#33b89d] transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#40DDC1]"
+                            disabled>
+                            Konfirmasi Barang Sampai
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                let orders = {};
+
+                fetch('/api/get/pemesanan')
+                    .then(response => response.json())
+                    .then(data => {
+                        orders = data;
+                        console.log(orders);
+                    })
+                    .catch(error => console.error('Error:', error));
+
+                function showSuccess(message) {
+                    const successBox = document.getElementById('successBox');
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.textContent = message;
+                    successBox.classList.remove('hidden');
+                    setTimeout(() => {
+                        successBox.classList.add('hidden');
+                    }, 3000);
+                }
+
+                function showError(message) {
+                    const errorBox = document.getElementById('errorBox');
+                    const errorMessage = document.getElementById('errorMessage');
+                    errorMessage.textContent = message;
+                    errorBox.classList.remove('hidden');
+                    setTimeout(() => {
+                        errorBox.classList.add('hidden');
+                    }, 3000);
+                }
+
+                function openModal(resi) {
+                    const modal = document.getElementById('checkoutModal');
+                    modal.style.display = 'flex';
+                    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                    const confirmButton = document.getElementById('confirmButton');
+                    confirmButton.onclick = function () {
+                        confirmOrder(resi);
+                    };
+                }
+
+                function closeModal(event) {
+                    const modal = document.getElementById('checkoutModal');
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                        modal.style.backgroundColor = 'transparent';
+                    }
+                }
+
+                document.getElementById('checkoutModal').addEventListener('click', closeModal);
+
+                async function trackOrder(idDistributor, noResi) {
+                    console.log(`${idDistributor} dan ${noResi}`);
+
+                    const response = await fetch('/api/track/order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            'id_distributor': idDistributor,
+                            'no_resi': noResi
+                        })
+                    });
+
+                    const distributorData = await response.json();
+
+                    const orderDetails = document.getElementById('orderDetails');
+                    const confirmButton = document.getElementById('confirmButton');
+
+                    if (distributorData.status === "Arrived") {
+                        confirmButton.className =
+                            "bg-[#40DDC1] text-white rounded-md py-2 px-4 text-sm font-semibold hover:bg-[#33b89d] transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#40DDC1]";
+                        confirmButton.disabled = false;
+                    } else {
+                        confirmButton.className =
+                            "bg-black text-white rounded-md py-2 px-4 text-sm font-semibold cursor-not-allowed";
+                        confirmButton.disabled = true;
+                    }
+
+                    if (distributorData) {
+                        orderDetails.innerHTML = `
+                            <p>No Resi: ${distributorData.no_resi}</p>
+                            <p>Status: ${distributorData.status}</p>
+                        `;
+                        openModal(distributorData.no_resi);
+                    } else {
+                        showError('Pesanan tidak ditemukan.');
+                    }
+                }
+
+                function confirmOrder(resi) {
+                    let data_confirm = null;
+                    for (const orderId in orders) {
+                        if (orders.hasOwnProperty(orderId) && orders[orderId].no_resi === resi) {
+                            data_confirm = orders[orderId];
+                            break;
+                        }
+                    }
+
+                    console.log(data_confirm);
+
+                    fetch('/api/confirm_order', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                data_confirm
+                            }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                showSuccess(data.message);
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 3000);
+                            } else {
+                                showError('Error: ' + data.error);
+                            }
+
+                            closeModal();
+
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            showError('Pesanan Diterima & Stok Berhasil Disimpan di Gudang');
+                        });
+                }
+            </script>
+{% endblock %}

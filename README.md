@@ -157,6 +157,25 @@ Once the installation is complete, open your browser and go to `http://127.0.0.1
    }
    ```
 
-## How to Integrate with Other Modules (Supplier & Distributor)
+**Interaction Between Modules (Purchasing Items to Build a Bicycle from a Supplier)**
+Checking Shipping Costs:
 
-1. Supplier:
+To check the shipping cost, you need to make a POST request to the supplier's API.
+The request should include:
+The list of products to be purchased.
+The quantity of each product.
+The destination address of the store (in this case, Bali).
+The API will respond with:
+The shipping cost (ongkir).
+The total price including shipping.
+The estimated delivery time.
+Purchase Confirmation:
+
+To confirm the purchase, you need to make another POST request to the supplier's API.
+The request should include:
+The total price (including the shipping cost).
+The products being purchased and their quantities.
+The API will respond with:
+A transaction number.
+A tracking number (no_resi).
+After receiving the response, the purchase details (including the transaction number and tracking number) will be saved in the database.

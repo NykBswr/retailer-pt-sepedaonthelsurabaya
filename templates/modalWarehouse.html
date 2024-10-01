@@ -151,8 +151,8 @@
                         <input type="hidden" id="selecteddistInput-{{ supplier.id }}" name="dist-{{ supplier.id }}">
 
                         <script>
-                            // List of dists
-                            const dists = [{
+                            // List of distributors
+                            const distributor_list = [{
                                     id: "Distributor1",
                                     distributor: "DIS01"
                                 },
@@ -195,7 +195,7 @@
                             });
 
                             // Populate dist list
-                            dists.forEach((distObj) => {
+                            distributor_list.forEach((distObj) => {
                                 const distItem = document.createElement('li');
                                 distItem.textContent = distObj.distributor;
                                 distItem.className =
