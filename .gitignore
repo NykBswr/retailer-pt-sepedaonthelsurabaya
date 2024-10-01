@@ -25,7 +25,6 @@ dist/
 public/
 
 # Compiled source files
-*.css
 *.min.css
 *.map
 
