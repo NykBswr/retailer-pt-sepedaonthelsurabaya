@@ -8,8 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import firebase_admin
 from firebase_admin import credentials, firestore
-from collections import defaultdict
-from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -27,7 +25,7 @@ firebaseConfig = {
 }
 
 # Inisialisasi Firestore dengan Firebase Admin SDK
-cred = credentials.Certificate('retailptsepedaonthelsurabaya-firebase-adminsdk-hjdab-8749cbf305.json')
+cred = credentials.Certificate('retail.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -158,8 +156,6 @@ def signout():
     session.pop('username', None)
     return redirect(url_for('index'))
 
-#tracking
-
 # Product
 @app.route('/product')
 def product():
@@ -175,6 +171,7 @@ def product():
     item_stock = {}
     wheel_list = []
     frame_list = []
+    sparepart_list = []
 
     for item in items:
         item_data = item.to_dict()
@@ -186,6 +183,8 @@ def product():
             wheel_list.append(item_name)
         elif supplier_name == 'Supplier 2':
             frame_list.append(item_name)
+        elif supplier_name == 'Supplier 3':
+            sparepart_list.append(item_name)
 
         # Keep track of stock levels
         item_stock[item_name] = int(item_data['amount'])
@@ -216,7 +215,8 @@ def product():
                         username=session.get('username'), 
                         products=product_list,
                         wheel_list=wheel_list,
-                        frame_list=frame_list)
+                        frame_list=frame_list,
+                        sparepart_list=sparepart_list)
 
 @app.route('/addProduct', methods=['POST'])
 def addProduct():
@@ -266,6 +266,8 @@ def editProduct(product_id):
     image = request.files.get('image')
     wheel = request.form['wheel']
     frame = request.form['frame']
+    sparepart = request.form['sparepart']
+
 
     # Cek apakah field penting diisi
     if not name or not price:
@@ -294,7 +296,8 @@ def editProduct(product_id):
             u'name': name,
             u'price': price_numeric,
             u'wheel': wheel,
-            u'frame': frame
+            u'frame': frame,
+            u'sparepart': sparepart
         }
 
         # Jika ada gambar baru, tambahkan ke data yang diperbarui
@@ -319,7 +322,7 @@ def deleteProduct(product_id):
     except Exception as e:
         flash(f'Error deleting product: {str(e)}', 'error')
         return redirect(url_for('product'))
-    
+
 # Cashier Area
 @app.route('/home')
 def home():
@@ -724,16 +727,16 @@ def warehouse():
             'key_id': 'id_produk',
             'key_stock': 'stock',
             'weight': 'berat'
+        },
+        {
+            'name': 'Supplier 3',
+            'url': 'https://supplier3.pythonanywhere.com/api/products',
+            'key_name': 'nama_produk',
+            'key_price': 'harga',
+            'key_id': 'id_produk',
+            'key_stock': 'stock',
+            'weight': 'berat'
         }
-        # {
-        #     'name': 'Supplier 3',
-        #     'url': 'https://suplierman.pythonanywhere.com/products/api/products',
-        #     'key_name': 'nama_produk',
-        #     'key_price': 'harga',
-        #     'key_id': 'id_produk',
-        #     'key_stock': 'stock',
-        #     'weight': 'berat'
-        # }
     ]
 
     # Fungsi untuk memproses setiap supplier
@@ -871,7 +874,7 @@ def warehouse():
     # Memproses kedua supplier dan menyimpan daftar produk baru masing-masing
     new_items_supplier1, list_stock1 = process_supplier(suppliers[0])
     new_items_supplier2, list_stock2 = process_supplier(suppliers[1])
-    # new_items_supplier3 = process_supplier(suppliers[2])
+    new_items_supplier3, list_stock3 = process_supplier(suppliers[2])
     
     # Fetch the updated list of items from Firestore
     updated_items = [item.to_dict() for item in items_ref.stream()]
@@ -879,7 +882,7 @@ def warehouse():
     # Memisahkan daftar item berdasarkan supplier
     items_supplier1 = [item for item in updated_items if item.get('supplier') == 'Supplier 1']
     items_supplier2 = [item for item in updated_items if item.get('supplier') == 'Supplier 2']
-    # items_supplier3 = [item for item in updated_items if item.get('supplier') == 'Supplier 3']
+    items_supplier3 = [item for item in updated_items if item.get('supplier') == 'Supplier 3']
 
     suppliers = [
         {'id': 'Supplier1', 'name': 'Supplier 1'},
@@ -894,14 +897,14 @@ def warehouse():
         username=session.get('username'),
         supplier1_new_items=new_items_supplier1,
         supplier2_new_items=new_items_supplier2,
-        # supplier3_new_items=new_items_supplier3,
+        supplier3_new_items=new_items_supplier3,
         items_supplier1=items_supplier1,
         items_supplier2=items_supplier2,
-        # items_supplier3=items_supplier3,
+        items_supplier3=items_supplier3,
         suppliers=suppliers,
         list_stock1=list_stock1,
         list_stock2=list_stock2,
-        # list_stock3=list_stock3
+        list_stock3=list_stock3
     )
 @app.route('/addItems/<supplier_name>', methods=['POST'])
 def addItems(supplier_name):
@@ -1035,10 +1038,10 @@ def addItems(supplier_name):
 
         if supplier_id == "SUP01":
             check_price_response = requests.post("http://167.99.238.114:8000/api/check_price", json=payload)
-        # elif supplier_id == "SUP02":
-        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
-        # else:
-        #     check_price_response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        elif supplier_id == "SUP02":
+            check_price_response = requests.post("https://suplierman.pythonanywhere.com/products/api/check_price", json=payload)
+        else:
+            check_price_response = requests.post("https://supplier3.pythonanywhere.com/api/cek_harga", json=payload)
         
         check_price_data = check_price_response.json()
 
@@ -1105,10 +1108,10 @@ def confirm_purchase():
         # Send POST request to external API
         if supplier_name == "Supplier 1":
             response = requests.post('http://167.99.238.114:8000/api/place_order', json=payload)
-        # elif supplier_name == "Supplier 2":
-        #     response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
-        # else:
-        #     response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        elif supplier_name == "Supplier 2":
+            response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+        else:
+            response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
         if response.status_code == 200:
             result = response.json()
 
