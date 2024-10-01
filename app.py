@@ -1041,7 +1041,7 @@ def addItems(supplier_name):
         elif supplier_id == "SUP02":
             check_price_response = requests.post("https://suplierman.pythonanywhere.com/products/api/check_price", json=payload)
         else:
-            check_price_response = requests.post("https://supplier3.pythonanywhere.com/api/cek_harga", json=payload)
+            check_price_response = requests.post("https://192.241.128.66:8000/api/cek_harga", json=payload)
         
         check_price_data = check_price_response.json()
 
@@ -1050,7 +1050,7 @@ def addItems(supplier_name):
             # Ambil informasi yang dibutuhkan dari respons
             harga_pengiriman = check_price_data.get("harga_pengiriman")
             lama_pengiriman = check_price_data.get("lama_pengiriman")
-            id_log = check_price_data.get("transaction_id")
+            id_log = check_price_data.get("id_log")
             try:
                 total_price = int(total_price)
                 harga_pengiriman = int(harga_pengiriman) 
@@ -1111,7 +1111,7 @@ def confirm_purchase():
         elif supplier_name == "Supplier 2":
             response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
         else:
-            response = requests.post("http://167.99.238.114:8000/check_price", json=payload)
+            response = requests.post("http://192.241.128.66:8000/api/checkout", json=payload)
         if response.status_code == 200:
             result = response.json()
 
@@ -1306,7 +1306,6 @@ def track_order():
 
         distributor_data = response.json()
         distributor_data['no_resi'] = data['no_resi']
-        distributor_data['status'] = "Arrived"
         return jsonify(distributor_data), 200
 
     except Exception as e:

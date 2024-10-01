@@ -247,27 +247,60 @@
                                         </button>
                                     </div>
                                 </td>
-                                <script>
-                                    let issparePartOpen = true;
-                                    const sparePartDropdown = document.getElementById('sparePartDropdown');
-                                    const sparePartList = document.getElementById('sparePartList');
-                                    const sparePartArrow = document.getElementById('sparePartArrow');
-
-                                    // Toggle dropdown visibility
-                                    sparePartDropdown.addEventListener('click', () => {
-                                        issparePartOpen = !issparePartOpen;
-                                        if (issparePartOpen) {
-                                            sparePartList.classList.remove('hidden');
-                                            sparePartArrow.classList.remove('rotate-0');
-                                            sparePartArrow.classList.add('rotate-180');
-                                        } else {
-                                            sparePartList.classList.add('hidden');
-                                            sparePartArrow.classList.remove('rotate-180');
-                                            sparePartArrow.classList.add('rotate-0');
-                                        }
-                                    });
-                                </script>
                             </tr>
+                        </tbody>
+                        <tbody id="sparePartList" class="visible">
+                            {% for item in items_supplier3 %}
+                            <tr>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mr-1 my-1 p-[2px]">
+                                        <h1 class="flex rounded-md border-0 bg-white px-1 py-2 text-xs
+                                        text-primary  outline-0 md:text-sm lg:text-base">
+                                            {{ item['name'] }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <h1
+                                            class="flex rounded-md border-0 bg-white px-1 py-2 text-xs outline-0 text-primary md:text-sm lg:text-base">
+                                            {{ item['price'] | currency }}
+                                        </h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div
+                                        class="cursor-pointer rounded-md bg-gradient-to-tl from-secondary to-primary text-white text-lg font-semibold mx-1 my-1 p-[2px]">
+                                        <h1
+                                            class="flex rounded-md border-0 bg-white px-1 py-2 text-xs outline-0 text-primary md:text-sm lg:text-base">
+                                            {{ item['amount'] }}
+                                        </h1>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <script>
+                                let issparePartOpen = true;
+                                const sparePartDropdown = document.getElementById('sparePartDropdown');
+                                const sparePartList = document.getElementById('sparePartList');
+                                const sparePartArrow = document.getElementById('sparePartArrow');
+
+                                // Toggle dropdown visibility
+                                sparePartDropdown.addEventListener('click', () => {
+                                    issparePartOpen = !issparePartOpen;
+                                    if (issparePartOpen) {
+                                        sparePartList.classList.remove('hidden');
+                                        sparePartArrow.classList.remove('rotate-0');
+                                        sparePartArrow.classList.add('rotate-180');
+                                    } else {
+                                        sparePartList.classList.add('hidden');
+                                        sparePartArrow.classList.remove('rotate-180');
+                                        sparePartArrow.classList.add('rotate-0');
+                                    }
+                                });
+                            </script>
                         </tbody>
                     </table>
                 </div>
