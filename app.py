@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import firebase_admin
 from firebase_admin import credentials, firestore
+from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -815,7 +816,7 @@ def warehouse():
                 
                 new_item = {
                     'name': product_name,
-                    'amount': 0,
+                    'amount': 100,
                     'price': product_price_int,
                     'supplier': supplier_name,
                     'supplier_id': supplier_id
